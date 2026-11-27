@@ -56,7 +56,11 @@ class RequestIdMiddleware:
             # CORS headers a browser needs to read it. So the answer is written here instead.
             if response_started:
                 raise
-            error_logger.exception("Unhandled exception")
+            # With the request id: it is the only link between the traceback and what the
+            # caller was told.
+            error_logger.exception(
+                "Unhandled exception", extra={"context": {"request_id": request_id}}
+            )
             await internal_error_response(request)(scope, receive, send_with_request_id)
         finally:
             # Method and path only: names and emails travel in bodies, never in logs.

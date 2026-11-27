@@ -84,6 +84,8 @@ def test_an_unhandled_error_is_logged_with_its_traceback(
     [error] = [line for line in lines if line["level"] == "ERROR"]
     assert error["logger"] == "app"
     assert "RuntimeError" in str(error["exception"])
+    # The traceback must be findable by the id the caller was shown.
+    assert error["request_id"] == "trace-500"
     [access] = [line for line in lines if line["logger"] == ACCESS_LOGGER]
     assert access["status_code"] == 500
     assert access["request_id"] == "trace-500"
