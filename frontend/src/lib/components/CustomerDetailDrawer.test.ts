@@ -68,6 +68,7 @@ describe('CustomerDetailDrawer', () => {
 	});
 
 	it('locks the scroll of the page while it is open', () => {
+		const { overflow } = document.body.style;
 		document.body.style.overflow = 'auto';
 		const { unmount } = renderDrawer();
 
@@ -76,6 +77,8 @@ describe('CustomerDetailDrawer', () => {
 		unmount();
 
 		expect(document.body.style.overflow).toBe('auto');
+		// The files that share a worker also share this document: leave it as it was found.
+		document.body.style.overflow = overflow;
 	});
 });
 

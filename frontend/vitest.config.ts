@@ -11,6 +11,9 @@ export default defineConfig({
 	},
 	test: {
 		environment: 'jsdom',
+		// Each file still gets its own module registry (own VM context), but the jsdom
+		// environment is created once per worker instead of once per file.
+		pool: 'vmThreads',
 		include: ['src/**/*.test.ts']
 	}
 });
