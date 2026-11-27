@@ -277,6 +277,10 @@ content-type: text/plain; charset=utf-8
 OK
 ```
 
+Una petición puede llevar `Content-Type` y las cabeceras que un navegador nunca somete a
+preflight (`Accept`, `Accept-Language`, `Content-Language`). Cualquier otra se rechaza con
+`400 Disallowed CORS headers`.
+
 El listado completo, más reciente primero:
 
 ```bash
@@ -346,6 +350,8 @@ uv run mypy app
 - Los tests usan una base de datos propia por test (SQLite en memoria, esquema creado en un
   fixture) e inyectan la sesión con un override de dependencias. Ninguno toca `customers.db` ni
   necesita red, y pasan en cualquier orden.
+- Tampoco dependen del entorno: la configuración que usan (`cors_origins`, `database_url`) la fija
+  un fixture, así que las variables de entorno y el archivo `.env` no cambian el resultado.
 - Un test ejecuta la CLI real de Alembic sobre un archivo temporal y comprueba que el esquema
   migrado es el que declaran los modelos. Otro arranca la aplicación con sus dependencias reales
   sobre un archivo SQLite.
@@ -463,7 +469,7 @@ nada. Para trabajar con la lista vacía, no lo ejecutes (o borra `customers.db` 
 
 Verificado, con la salida en el reporte de la tarea:
 
-- `uv run pytest` (84 tests), `ruff check`, `ruff format --check` y `mypy app`.
+- `uv run pytest` (102 tests), `ruff check`, `ruff format --check` y `mypy app`.
 - Base de datos desde cero: `alembic upgrade head`, el seed dos veces (la segunda no crea nada) y
   cada endpoint con `curl`, incluidos `409`, `404`, `422`, `405`, `/health`, el eco de
   `X-Request-ID` y el preflight CORS. Salidas en este README.
