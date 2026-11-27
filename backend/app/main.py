@@ -33,6 +33,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST", "PATCH"],
+        # Listed to state the contract: Starlette safelists Content-Type anyway, so this line
+        # alone changes nothing. What the CORS tests pin is that no other header gets through.
         allow_headers=["Content-Type"],
     )
     app.include_router(customers.router)
