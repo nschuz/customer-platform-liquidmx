@@ -15,11 +15,12 @@ services:
     volumes:
       - backend_data:/data
     healthcheck:
-      # The slim image has no curl: Python's standard library is enough.
+      # The slim image has no curl: Python's standard library is enough. Each poll is a request and
+      # so a line in the access log, which is why the interval is 30 s and not a few.
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
-      interval: 5s
+      interval: 30s
       timeout: 3s
-      retries: 6
+      retries: 3
       start_period: 10s
     security_opt:
       - no-new-privileges:true
@@ -33,6 +34,9 @@ services:
       # Read by the frontend server when it starts, not when the image is built: changing it
       # only takes `docker compose up -d frontend`. An empty value selects the simulated API.
       PUBLIC_API_URL: "${PUBLIC_API_URL-http://localhost:8000}"
+      # Whether the simulated API starts with no customers. It only matters when PUBLIC_API_URL is
+      # empty; the default keeps the ten demo customers.
+      MOCK_EMPTY: "${MOCK_EMPTY:-false}"
     depends_on:
       backend:
         condition: service_healthy
