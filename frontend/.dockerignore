@@ -1,0 +1,16 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies and build output: both are created inside the image. A pattern without **/ only
+# matches at the root of the context.
+**/node_modules
+build/
+.svelte-kit/
+
+# Local environment files: PUBLIC_API_URL is a runtime variable, never baked into the image
+**/.env*
+
+# Logs and OS files
+npm-debug.log*
+**/.DS_Store

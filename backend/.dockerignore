@@ -1,0 +1,22 @@
+# Version control
+.git
+.gitignore
+
+# Local environment and virtualenv (the image builds its own)
+.env
+.venv
+
+# Caches. Unlike .gitignore, a pattern here only matches at the root of the context unless it
+# starts with **/, and __pycache__ directories appear inside every package.
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Tests are run outside the image
+tests/
+
+# Local database
+*.db
+*.sqlite3
