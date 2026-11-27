@@ -5,6 +5,9 @@ export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 /** The status pills of the dashboard: one of the statuses, or `ALL` for no filter. */
 export type StatusFilter = CustomerStatus | 'ALL';
 
+/** The pills, in the order they are shown. */
+export const STATUS_FILTERS: readonly StatusFilter[] = ['ALL', 'ACTIVE', 'PENDING', 'BLOCKED'];
+
 /** A customer as the API returns it. The snake_case keys are part of the contract. */
 export interface Customer {
 	id: string;
@@ -44,6 +47,14 @@ export const STATUS_LABELS: Record<CustomerStatus, string> = {
 	ACTIVE: 'Activo',
 	PENDING: 'Pendiente',
 	BLOCKED: 'Bloqueado'
+};
+
+/** Labels of the filter pills, which are counted and so go in plural. */
+export const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+	ALL: 'Todos',
+	ACTIVE: 'Activos',
+	PENDING: 'Pendientes',
+	BLOCKED: 'Bloqueados'
 };
 
 export function isCustomerStatus(value: unknown): value is CustomerStatus {

@@ -1,18 +1,41 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import CustomerCard from '#lib/components/CustomerCard.svelte';
+	import CustomerFilters from '#lib/components/CustomerFilters.svelte';
 	import CustomerTable from '#lib/components/CustomerTable.svelte';
+	import SearchInput from '#lib/components/SearchInput.svelte';
 	import SkeletonLoader from '#lib/components/SkeletonLoader.svelte';
 	import { customersStore } from '#lib/customers.svelte.ts';
 	import { API_HOST, IS_MOCK_API } from '#lib/services/customerApi.ts';
+	import type { StatusFilter } from '#lib/types/customer.ts';
 	import { DISPLAY_TIME_ZONE } from '#lib/utils/formatters.ts';
+	import { countByStatus, filterCustomers } from '#lib/utils/search.ts';
 
 	const store = customersStore;
+
+	// UI state: what the user typed and selected. The data itself lives in the store.
+	let searchText = $state('');
+	let query = $state('');
+	let activeStatus = $state<StatusFilter>('ALL');
+
+	// The counts follow the search only; the list also follows the status pill.
+	const statusCounts = $derived(countByStatus(store.customers, query));
+	const visibleCustomers = $derived(
+		filterCustomers(store.customers, { query, status: activeStatus })
+	);
 
 	// Data is fetched in the browser, so the server only renders the shell with its skeletons.
 	onMount(() => {
 		void store.load();
 	});
+
+	function setStatusFilter(status: StatusFilter) {
+		activeStatus = status;
+	}
+
+	function setQuery(value: string) {
+		query = value;
+	}
 </script>
 
 <svelte:head>
@@ -23,8 +46,20 @@
 	<main class="flex-1">
 		<header class="mb-6">
 			<h1 class="text-2xl font-semibold text-ink">Customer Dashboard</h1>
-			<p class="mt-1 text-muted">Consulta los clientes de la plataforma.</p>
+			<p class="mt-1 text-muted">Consulta, filtra y busca los clientes de la plataforma.</p>
 		</header>
+
+		{#if !store.loading}
+			<section
+				class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+				aria-label="Filtros y búsqueda"
+			>
+				<CustomerFilters active={activeStatus} counts={statusCounts} onChange={setStatusFilter} />
+				<div class="w-full shrink-0 md:w-80">
+					<SearchInput bind:text={searchText} onSearch={setQuery} />
+				</div>
+			</section>
+		{/if}
 
 		<!-- Announces the loading to screen readers; it sits outside the busy region on purpose. -->
 		<p class="sr-only" role="status">
@@ -36,10 +71,10 @@
 				<SkeletonLoader variant="cards" />
 			{:else}
 				<div class="hidden md:block">
-					<CustomerTable customers={store.customers} />
+					<CustomerTable customers={visibleCustomers} />
 				</div>
 				<ul class="space-y-3 md:hidden">
-					{#each store.customers as customer (customer.id)}
+					{#each visibleCustomers as customer (customer.id)}
 						<CustomerCard {customer} />
 					{/each}
 				</ul>
