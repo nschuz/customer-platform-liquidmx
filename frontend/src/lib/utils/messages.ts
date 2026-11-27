@@ -1,6 +1,7 @@
 import { ApiError, CONNECTION_ERROR_MESSAGE } from '#lib/services/customerApi.ts';
 
 const SAVE_FAILED = 'No se pudo guardar el cambio.';
+const LOAD_FAILED = 'No se pudieron cargar los clientes.';
 const UNEXPECTED_ERROR = 'Ha ocurrido un error inesperado.';
 
 /** Describes in Spanish what went wrong with a change, going by the error's `code`: the server's
@@ -18,4 +19,15 @@ export function describeApiError(error: unknown): string {
 		return detail ? `${SAVE_FAILED} ${detail}` : SAVE_FAILED;
 	}
 	return `${SAVE_FAILED} Inténtalo de nuevo.`;
+}
+
+/** Describes in Spanish what went wrong with a load, for the error banner. What the server said
+ * is in English and never comes alone: the banner leads with its own words and keeps the server's
+ * after them. Anything that is not an `ApiError` is unexpected and gets a generic message. */
+export function describeLoadError(error: unknown): string {
+	if (!(error instanceof ApiError)) return UNEXPECTED_ERROR;
+	// No HTTP response: the network failed or the request timed out.
+	if (error.status === 0) return CONNECTION_ERROR_MESSAGE;
+	const detail = error.message.trim();
+	return detail ? `${LOAD_FAILED} ${detail}` : LOAD_FAILED;
 }

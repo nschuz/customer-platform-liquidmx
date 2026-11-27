@@ -13,7 +13,7 @@ const MOCK_BASE_URL = '/api';
 const CUSTOMERS_PATH = '/customers';
 const REQUEST_TIMEOUT_MS = 10_000;
 
-/** What the UI says when a request gets no answer. The error banner shows it as it is. */
+/** What the UI says when a request gets no answer. The error banner shows it for a load. */
 export const CONNECTION_ERROR_MESSAGE =
 	'No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.';
 

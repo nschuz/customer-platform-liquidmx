@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ApiError } from '#lib/services/customerApi.ts';
+	import { describeLoadError } from '#lib/utils/messages.ts';
 
 	let { error, onRetry }: { error: ApiError; onRetry: () => void } = $props();
 </script>
@@ -9,7 +10,7 @@
 	class="flex flex-col gap-4 rounded-xl border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between"
 >
 	<div class="min-w-0">
-		<p class="font-medium text-red-900">{error.message}</p>
+		<p class="font-medium text-red-900">{describeLoadError(error)}</p>
 		{#if error.requestId}
 			<p class="mt-1 text-xs text-red-800">
 				Id de la solicitud: <code class="font-mono">{error.requestId}</code>
