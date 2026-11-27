@@ -41,5 +41,7 @@ USER app
 EXPOSE 8000
 
 # Migrates and seeds before every start, then replaces itself with the command.
+# Shell form so the command honours PORT: managed platforms (Render) inject it and route to it;
+# anywhere else the fallback keeps port 8000, which is what Compose and the docs use.
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
