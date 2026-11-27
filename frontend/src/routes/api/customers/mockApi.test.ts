@@ -197,6 +197,27 @@ describe('POST /api/customers', () => {
 		const error = await errorOf(response, 422, 'VALIDATION_ERROR');
 		expect(error.details?.map((detail) => detail.field).sort()).toEqual(['email', 'name']);
 	});
+
+	it('creates a customer even when the mock started empty', async () => {
+		vi.resetModules();
+		vi.doMock('$app/env/private', () => ({ MOCK_EMPTY: true }));
+		try {
+			const { collection } = await loadRoutes();
+
+			expect(await emailsIn(await call(collection.GET))).toEqual([]);
+
+			const response = await call(collection.POST, {
+				method: 'POST',
+				body: { name: 'Sofía Romero', email: 'sofia.romero@example.com' }
+			});
+
+			expect(response.status).toBe(201);
+			expect(await emailsIn(await call(collection.GET))).toEqual(['sofia.romero@example.com']);
+		} finally {
+			vi.doUnmock('$app/env/private');
+			vi.resetModules();
+		}
+	});
 });
 
 describe('GET /api/customers/{customer_id}', () => {

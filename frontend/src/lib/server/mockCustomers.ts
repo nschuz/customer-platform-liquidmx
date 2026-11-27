@@ -1,9 +1,10 @@
+import { MOCK_EMPTY } from '$app/env/private';
 import type { CreateCustomerInput, Customer, CustomerStatus } from '#lib/types/customer.ts';
 import { emailAlreadyExists, notFound } from './mockApi.ts';
 import { SEED_CUSTOMERS } from './seedCustomers.ts';
 
 /** The in-memory table of the mock. It lives for as long as the server process. */
-let customers: Customer[] = [...SEED_CUSTOMERS];
+let customers: Customer[] = MOCK_EMPTY ? [] : [...SEED_CUSTOMERS];
 
 /** Newest first, ties broken by id, like the backend does. */
 export function listCustomers(status: CustomerStatus | null): Customer[] {

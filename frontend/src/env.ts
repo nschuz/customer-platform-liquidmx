@@ -5,5 +5,9 @@ export const variables = defineEnvVars({
 	PUBLIC_API_URL: {
 		public: true,
 		schema: (value) => value?.trim() || undefined
+	},
+	/** `true` makes the mock start with no customers, to see the empty state. */
+	MOCK_EMPTY: {
+		schema: (value) => value === 'true'
 	}
 });
