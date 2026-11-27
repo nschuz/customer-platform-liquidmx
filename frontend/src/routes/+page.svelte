@@ -11,6 +11,7 @@
 	import { customersStore } from '#lib/customers.svelte.ts';
 	import { API_HOST, IS_MOCK_API } from '#lib/services/customerApi.ts';
 	import type { Customer, StatusFilter } from '#lib/types/customer.ts';
+	import { focusFirstButton } from '#lib/utils/focus.ts';
 	import { DISPLAY_TIME_ZONE } from '#lib/utils/formatters.ts';
 	import { countByStatus, filterCustomers } from '#lib/utils/search.ts';
 
@@ -21,12 +22,11 @@
 	let query = $state('');
 	let activeStatus = $state<StatusFilter>('ALL');
 	let selectedId = $state<string | null>(null);
-	/**
-	 * The "Ver detalle" button that opened the drawer. It gets the focus back when the drawer closes.
-	 * It is the button the click event reports, not `document.activeElement`: some browsers do not
-	 * focus a button on mouse click.
-	 */
+	// The "Ver detalle" button that opened the drawer: it gets the focus back when it closes. It is
+	// the button the click reports, not `document.activeElement`: some browsers do not focus a
+	// button on a mouse click.
 	let detailOpener: HTMLButtonElement | null = null;
+	let listSection = $state<HTMLElement>();
 
 	// The counts follow the search only; the list also follows the status pill.
 	const statusCounts = $derived(countByStatus(store.customers, query));
@@ -67,7 +67,10 @@
 	async function closeDetail() {
 		selectedId = null;
 		await tick(); // only then is the page no longer inert and the button focusable again
-		detailOpener?.focus();
+		// The opener is gone when its row left the list meanwhile (a status change that no longer
+		// matches the filter): the focus goes to the first row that is shown, instead of to <body>.
+		if (detailOpener?.isConnected) detailOpener.focus();
+		else focusFirstButton(listSection);
 	}
 </script>
 
@@ -108,7 +111,7 @@
 				Clientes cargados
 			{/if}
 		</p>
-		<section aria-label="Clientes" aria-busy={store.loading}>
+		<section aria-label="Clientes" aria-busy={store.loading} bind:this={listSection}>
 			{#if store.loading}
 				<SkeletonLoader variant="table" />
 				<SkeletonLoader variant="cards" />

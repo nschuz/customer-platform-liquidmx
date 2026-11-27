@@ -21,7 +21,14 @@ const juan: Customer = {
 	status: 'ACTIVE',
 	created_at: '2026-09-29T08:15:00.000Z'
 };
-const customers = [carmen, juan];
+const lucia: Customer = {
+	id: '3f3fc070-e756-470b-87ce-5e22114e371e',
+	name: 'Lucía Díaz',
+	email: 'lucia.diaz@example.com',
+	status: 'ACTIVE',
+	created_at: '2026-11-23T19:50:00.000Z'
+};
+const customers = [lucia, juan, carmen];
 const juanBlocked: Customer = { ...juan, status: 'BLOCKED' };
 
 /** Serves the list, and leaves the status change unanswered until the test says so. */
@@ -107,5 +114,28 @@ describe('Customer Dashboard page', () => {
 		expect(within(dialog()).getAllByRole('button', { pressed: true })).toEqual([
 			option('Bloqueado')
 		]);
+	});
+
+	it('returns the focus to the first row of the list when the opener left it', async () => {
+		const { answerPatch } = serveApi();
+		render(Page);
+		await fireEvent.click(await screen.findByRole('button', { name: /^Activos/ }));
+		const [opener] = await screen.findAllByRole('button', { name: 'Ver detalle de Juan Pérez' });
+		await fireEvent.click(opener);
+		await fireEvent.click(
+			within(screen.getByRole('dialog', { name: 'Juan Pérez' })).getByRole('button', { name: 'Bloqueado' })
+		);
+		answerPatch();
+		await screen.findByText('Estado actualizado a Bloqueado.');
+		// Juan no longer matches the filter: his row is gone, and the drawer stays open on him.
+		expect(screen.queryByRole('button', { name: 'Ver detalle de Juan Pérez' })).toBeNull();
+		expect(screen.getByRole('dialog', { name: 'Juan Pérez' })).toBeTruthy();
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(screen.queryByRole('dialog')).toBeNull();
+		// The table and the cards both carry the button: the first in the document gets the focus.
+		const [firstShown] = screen.getAllByRole('button', { name: 'Ver detalle de Lucía Díaz' });
+		expect(document.activeElement).toBe(firstShown);
 	});
 });

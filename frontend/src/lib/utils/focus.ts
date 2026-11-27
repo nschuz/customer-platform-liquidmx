@@ -21,3 +21,13 @@ export function trapTabKey(event: KeyboardEvent & { currentTarget: HTMLElement }
 		(event.shiftKey ? last : first).focus();
 	}
 }
+
+/** Focuses the first button under `root` that can take the focus. The list of the dashboard is
+ * rendered twice, as a table and as cards, and only one of the two is shown: `focus()` does
+ * nothing on a button that is not displayed, so the first one that answers is the first shown. */
+export function focusFirstButton(root: ParentNode | null | undefined): void {
+	for (const button of root?.querySelectorAll('button') ?? []) {
+		button.focus();
+		if (document.activeElement === button) return;
+	}
+}
