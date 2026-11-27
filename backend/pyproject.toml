@@ -50,9 +50,13 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 
+[tool.ruff.lint.isort]
+# The migrations directory is called like the third-party package; keep it sorted as such.
+known-third-party = ["alembic"]
+
 [tool.mypy]
 python_version = "3.12"
-files = ["app", "tests"]
+files = ["app", "alembic", "tests"]
 plugins = ["pydantic.mypy"]
 disallow_untyped_defs = true
 check_untyped_defs = true
