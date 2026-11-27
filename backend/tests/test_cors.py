@@ -16,8 +16,7 @@ STRANGER = "https://stranger.example.com"
 @pytest.fixture
 def client() -> Generator[TestClient]:
     settings = Settings(_env_file=None, cors_origins=[DASHBOARD, STAGING])
-    with TestClient(create_app(settings)) as client:
-        yield client
+    yield TestClient(create_app(settings))
 
 
 def test_preflight_allows_the_methods_and_headers_the_api_uses(client: TestClient) -> None:

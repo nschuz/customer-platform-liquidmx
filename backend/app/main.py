@@ -1,17 +1,30 @@
 """Application entry point: `uvicorn app.main:app`."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import customers, health
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
+from app.core.logging import configure_logging
+from app.core.middleware import RequestIdMiddleware
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Runs once per process when the server starts: logging is configured here, after uvicorn
+    has installed its own loggers."""
+    configure_logging()
+    yield
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the application: routers, middleware and exception handlers."""
     settings = settings or get_settings()
-    app = FastAPI(title="Customer Management API", version="1.0.0")
+    app = FastAPI(title="Customer Management API", version="1.0.0", lifespan=lifespan)
     register_exception_handlers(app)
     app.add_middleware(
         CORSMiddleware,
@@ -19,6 +32,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["Content-Type"],
     )
+    # Added last, so it runs first: every response, CORS ones included, gets a request id.
+    app.add_middleware(RequestIdMiddleware)
     app.include_router(customers.router)
     app.include_router(health.router)
     return app

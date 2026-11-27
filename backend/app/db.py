@@ -18,7 +18,8 @@ def create_db_engine(database_url: str) -> Engine:
     is_sqlite = make_url(database_url).get_backend_name() == "sqlite"
     # Sync endpoints run in a threadpool, so one session can be used from several threads.
     connect_args = {"check_same_thread": False} if is_sqlite else {}
-    return create_engine(database_url, connect_args=connect_args)
+    # Parameters hold names and emails: keep them out of error messages, which get logged.
+    return create_engine(database_url, connect_args=connect_args, hide_parameters=True)
 
 
 engine = create_db_engine(get_settings().database_url)

@@ -2,8 +2,11 @@
 
 import pytest
 from sqlalchemy import Engine, event
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from app import db
+from app.models import Customer
 
 
 def test_get_session_returns_its_connection_when_the_request_ends(guard_engine: Engine) -> None:
@@ -25,3 +28,20 @@ def test_get_session_returns_its_connection_when_the_request_ends(guard_engine: 
         next(dependency)  # the request ends
 
     assert in_use == []
+
+
+def test_database_errors_do_not_expose_statement_parameters(guard_engine: Engine) -> None:
+    """Exception text is what gets logged when a request fails. Statement parameters hold
+    names and emails, so the engine must keep them out of it."""
+    with Session(guard_engine) as session:
+        session.add_all(
+            [
+                Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING"),
+                Customer(name="Juan Pérez", email="juan.perez@example.com", status="ACTIVE"),
+            ]
+        )
+        with pytest.raises(IntegrityError) as failure:
+            session.flush()
+
+    assert "juan.perez@example.com" not in str(failure.value)
+    assert "Juan Pérez" not in str(failure.value)
