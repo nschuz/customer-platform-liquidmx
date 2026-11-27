@@ -1,11 +1,21 @@
 <script lang="ts">
-	import { STATUS_LABELS, type Customer } from '#lib/types/customer.ts';
+	import {
+		STATUS_LABELS,
+		type Customer,
+		type CustomerStatus
+	} from '#lib/types/customer.ts';
 	import { formatDateTime } from '#lib/utils/formatters.ts';
+	import CustomerStatusControl from './CustomerStatusControl.svelte';
 	import StatusBadge from './StatusBadge.svelte';
 
 	const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-	let { customer, onClose }: { customer: Customer; onClose: () => void } = $props();
+	let { customer, onClose, onStatusChange }: {
+		customer: Customer;
+		onClose: () => void;
+		/** Saves the status of the customer shown; rejects when the server did not accept it. */
+		onStatusChange: (status: CustomerStatus) => Promise<void>;
+	} = $props();
 
 	let closeButton = $state<HTMLButtonElement>();
 
@@ -109,5 +119,9 @@
 				<dd class="mt-1 font-mono text-xs break-all text-ink select-all">{customer.id}</dd>
 			</div>
 		</dl>
+
+		<div class="border-t border-line px-6 py-4">
+			<CustomerStatusControl status={customer.status} onChange={onStatusChange} />
+		</div>
 	</div>
 </div>

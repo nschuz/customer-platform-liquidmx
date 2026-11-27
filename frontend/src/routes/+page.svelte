@@ -137,5 +137,11 @@
 </div>
 
 {#if selectedCustomer}
-	<CustomerDetailDrawer customer={selectedCustomer} onClose={closeDetail} />
+	<CustomerDetailDrawer
+		customer={selectedCustomer}
+		onClose={closeDetail}
+		onStatusChange={async (status) => {
+			await store.updateStatus(selectedCustomer.id, status);
+		}}
+	/>
 {/if}

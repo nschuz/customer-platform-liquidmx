@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import type { Customer } from '#lib/types/customer.ts';
 import CustomerDetailDrawer from './CustomerDetailDrawer.svelte';
 
@@ -11,9 +11,9 @@ const customer: Customer = {
 	created_at: '2026-11-09T15:55:00.000Z'
 };
 
-function renderDrawer(onClose = vi.fn()) {
-	const result = render(CustomerDetailDrawer, { customer, onClose });
-	return { ...result, onClose };
+function renderDrawer(onClose = vi.fn(), onStatusChange = vi.fn()) {
+	const result = render(CustomerDetailDrawer, { customer, onClose, onStatusChange });
+	return { ...result, onClose, onStatusChange };
 }
 
 describe('CustomerDetailDrawer', () => {
@@ -34,6 +34,31 @@ describe('CustomerDetailDrawer', () => {
 		expect(dialog.textContent).toContain('09 nov 2026, 15:55 UTC');
 		expect(dialog.textContent).toContain('2026-11-09T15:55:00.000Z');
 		expect(dialog.textContent).toContain('6a25261c-26e6-4bc1-b4ba-fd12643c1150');
+	});
+
+	it('offers the status control inside the dialog, pressed on the status of the customer', () => {
+		renderDrawer();
+		const dialog = within(screen.getByRole('dialog'));
+		const control = dialog.getByRole('group', { name: 'Cambiar estado' });
+
+		const options = within(control).getAllByRole('button');
+		expect(options.map((option) => option.textContent?.trim())).toEqual([
+			'Activo',
+			'Pendiente',
+			'Bloqueado'
+		]);
+		expect(within(control).getAllByRole('button', { pressed: true })).toEqual([
+			within(control).getByRole('button', { name: 'Bloqueado' })
+		]);
+	});
+
+	it('asks for the status chosen in the control', async () => {
+		const { onStatusChange } = renderDrawer();
+		const dialog = within(screen.getByRole('dialog'));
+
+		await fireEvent.click(dialog.getByRole('button', { name: 'Activo' }));
+
+		expect(onStatusChange).toHaveBeenCalledExactlyOnceWith('ACTIVE');
 	});
 
 	it('takes the focus when it opens', () => {
@@ -92,63 +117,48 @@ describe('focus trap of the drawer', () => {
 		return event.defaultPrevented;
 	}
 
-	/** The drawer has one control today; this stands in for the controls a later task adds. */
-	function addExtraControl(dialog: HTMLElement): HTMLButtonElement {
-		const extra = document.createElement('button');
-		extra.textContent = 'Extra';
-		dialog.append(extra);
-		return extra;
+	/** The two ends of the drawer: its first control and its last one. */
+	function ends() {
+		return {
+			closeButton: screen.getByRole('button', { name: 'Cerrar detalle' }),
+			lastOption: screen.getByRole('button', { name: 'Bloqueado' })
+		};
 	}
 
 	it('claims Tab on the last control and wraps to the first', async () => {
 		renderDrawer();
-		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
-		const extra = addExtraControl(screen.getByRole('dialog'));
+		const { closeButton, lastOption } = ends();
 
-		extra.focus();
+		lastOption.focus();
 
-		expect(await press(extra, { key: 'Tab' })).toBe(true);
+		expect(await press(lastOption, { key: 'Tab' })).toBe(true);
 		expect(document.activeElement).toBe(closeButton);
 	});
 
 	it('claims Shift+Tab on the first control and wraps to the last', async () => {
 		renderDrawer();
-		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
-		const extra = addExtraControl(screen.getByRole('dialog'));
+		const { closeButton, lastOption } = ends();
 
 		closeButton.focus();
 
 		expect(await press(closeButton, { key: 'Tab', shiftKey: true })).toBe(true);
-		expect(document.activeElement).toBe(extra);
+		expect(document.activeElement).toBe(lastOption);
 	});
 
 	it('claims Tab in both directions when the panel itself has the focus', async () => {
 		renderDrawer();
 		const dialog = screen.getByRole('dialog');
-		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
-		const extra = addExtraControl(dialog);
+		const { closeButton, lastOption } = ends();
 
 		// A click on the content of the drawer leaves the focus on the panel itself (tabindex -1).
 		dialog.focus();
 
 		expect(await press(dialog, { key: 'Tab', shiftKey: true })).toBe(true);
-		expect(document.activeElement).toBe(extra);
+		expect(document.activeElement).toBe(lastOption);
 
 		dialog.focus();
 
 		expect(await press(dialog, { key: 'Tab' })).toBe(true);
-		expect(document.activeElement).toBe(closeButton);
-	});
-
-	it('claims Tab in both directions when it is the only control', async () => {
-		renderDrawer();
-		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
-		closeButton.focus();
-
-		expect(await press(closeButton, { key: 'Tab' })).toBe(true);
-		expect(document.activeElement).toBe(closeButton);
-
-		expect(await press(closeButton, { key: 'Tab', shiftKey: true })).toBe(true);
 		expect(document.activeElement).toBe(closeButton);
 	});
 });
