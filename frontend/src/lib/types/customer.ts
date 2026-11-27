@@ -27,6 +27,16 @@ export interface ValidationErrorDetail {
 	message: string;
 }
 
+/** Body of every error response, shared by the backend and the mock. */
+export interface ApiErrorBody {
+	error: {
+		code: string;
+		message: string;
+		request_id: string;
+		details?: ValidationErrorDetail[];
+	};
+}
+
 export const STATUS_LABELS: Record<CustomerStatus, string> = {
 	ACTIVE: 'Activo',
 	PENDING: 'Pendiente',

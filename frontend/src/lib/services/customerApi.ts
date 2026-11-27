@@ -6,6 +6,7 @@ import {
 	type CustomerStatus,
 	type ValidationErrorDetail
 } from '#lib/types/customer.ts';
+import { asRecord } from '#lib/utils/guards.ts';
 
 const MOCK_BASE_URL = '/api';
 const CUSTOMERS_PATH = '/customers';
@@ -157,10 +158,6 @@ function toApiError(error: unknown, signal: AbortSignal): ApiError {
 		code: 'NETWORK_ERROR',
 		message: 'No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.'
 	});
-}
-
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-	return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
 }
 
 function isValidationErrorDetail(value: unknown): value is ValidationErrorDetail {
