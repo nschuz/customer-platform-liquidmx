@@ -1,9 +1,19 @@
 # Customer Platform
 
+[![CI](https://github.com/nschuz/customer-platform-liquidmx/actions/workflows/ci.yml/badge.svg)](https://github.com/nschuz/customer-platform-liquidmx/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v1.1.0-blue)](CHANGELOG.md)
+
+**Español** · [English below](#english)**
+
 API para administrar clientes de una plataforma financiera y el dashboard que la consume. Un solo
 repositorio con dos partes: el backend en **Python / FastAPI** y el frontend en
 **SvelteKit / TypeScript**. Cada mitad funciona por sí sola y, usadas juntas, forman el flujo
 completo.
+
+Documentación adicional en [`docs/`](docs/): [arquitectura C4](docs/architecture/c4.md),
+[diagramas de secuencia](docs/architecture/sequences.md), [modelo de datos](docs/data/model.md),
+[decisiones (ADR)](docs/adr/), [OpenAPI exportada](docs/api/openapi.json) y una
+[colección de Postman](docs/api/customer-platform.postman_collection.json) lista para importar.
 
 | Parte      | Qué es                                                                  | Tecnología                                             |
 | ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -172,7 +182,8 @@ Las rutas se sirven en la raíz, sin prefijo.
 
 ### Ejemplos con curl
 
-Con el stack en marcha (API en `http://localhost:8000`).
+Con el stack en marcha (API en `http://localhost:8000`). Lo mismo, listo para importar y ejecutar:
+la [colección de Postman](docs/api/customer-platform.postman_collection.json) de `docs/api/`.
 
 Health:
 
@@ -434,3 +445,142 @@ No verificado:
 - **Otras arquitecturas.** Las imágenes se construyeron y probaron en `linux/arm64`.
 - **Un puerto 3000 libre.** En la máquina donde se verificó estaba ocupado, así que el frontend se
   probó publicado en otro puerto (`FRONTEND_PORT`); el valor por defecto es 3000.
+
+---
+
+## English
+
+API to manage customers of a financial platform, plus the dashboard that consumes it. One
+repository, two halves: the backend in **Python / FastAPI** and the frontend in
+**SvelteKit / TypeScript**. Each half works on its own; together they form the full flow.
+(The Spanish section above is the primary, fully detailed version.)
+
+| Part       | What it is                                                            | Stack                                                   |
+| ---------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| `backend/` | Customer Management API: create, list, get and change status          | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy, Alembic  |
+| `frontend/`| Customer Dashboard: responsive table, filters, search, detail drawer  | SvelteKit, Svelte 5, TypeScript, Tailwind CSS 4          |
+| root       | Docker images, Docker Compose, `Makefile` and the CI workflow         | Docker, GitHub Actions                                  |
+
+More documentation in [`docs/`](docs/): [C4 architecture](docs/architecture/c4.md),
+[sequence diagrams](docs/architecture/sequences.md), [data model](docs/data/model.md),
+[ADRs](docs/adr/), [exported OpenAPI](docs/api/openapi.json) and a
+[ready-to-import Postman collection](docs/api/customer-platform.postman_collection.json).
+
+### Requirements
+
+- **With Docker:** Docker with Compose v2. Nothing else.
+- **Without Docker:** Python 3.12+ with [uv](https://docs.astral.sh/uv/) (or `pip`), Node.js
+  22.22+ with npm, and GNU Make for the shortcuts.
+
+### Quick start
+
+With Docker (one command):
+
+```sh
+docker compose up --build
+```
+
+On first run it downloads the base images and builds (a few minutes). Once both services are
+healthy:
+
+- Dashboard: <http://localhost:3000>
+- API: <http://localhost:8000> · interactive docs: <http://localhost:8000/docs>
+
+On startup the backend applies migrations and seeds 10 demo customers (5 `ACTIVE`, 3 `PENDING`,
+2 `BLOCKED`), so the dashboard has data from the first second. The database lives in a named
+volume: changes survive `docker compose restart` and `docker compose down`; `down -v` also
+deletes the data. If ports 3000/8000 are taken on your machine, copy `.env.example` to `.env`
+and adjust `FRONTEND_PORT`/`BACKEND_PORT` (and with them `PUBLIC_API_URL` and `CORS_ORIGINS`).
+`SEED_ON_STARTUP=false` starts empty only with a fresh volume (`docker compose down -v` first).
+
+Without Docker, two terminals:
+
+```sh
+# backend
+cd backend
+uv sync --frozen                      # or: pip install -e ".[dev]"
+uv run alembic upgrade head
+uv run python -m scripts.seed         # demo customers (optional, idempotent)
+uv run uvicorn app.main:app --reload  # http://localhost:8000
+
+# frontend
+cd frontend
+npm ci
+PUBLIC_API_URL=http://localhost:8000 npm run dev   # http://localhost:5173
+```
+
+Without `PUBLIC_API_URL` the frontend uses its **built-in mock API** and needs no backend. Run
+`make install` and `make migrate` before the first `make dev-backend`. `make` (or `make help`)
+lists every shortcut; `make up` and the URL-printing targets need a POSIX shell (`sh`, `sed`) —
+on Windows use Git Bash or WSL.
+
+### API
+
+Routes are served at the root, no prefix.
+
+| Method and route                         | Success                                 | Errors                                     |
+| ---------------------------------------- | --------------------------------------- | ------------------------------------------ |
+| `POST /customers`                        | `201` created, always `PENDING`          | `409` duplicate email · `422` validation   |
+| `GET /customers?status=…`                | `200` array, newest first               | `422` invalid `status`                     |
+| `GET /customers/{customer_id}`           | `200` customer                          | `404` not found · `422` malformed id       |
+| `PATCH /customers/{customer_id}/status`  | `200` updated customer (idempotent)     | `404` not found · `422` invalid status     |
+| `GET /health`                            | `200` `{"status": "ok"}`                | —                                          |
+
+Every error response uses one envelope:
+
+```json
+{ "error": { "code": "…", "message": "…", "request_id": "…", "details": [ { "field": "…", "message": "…" } ] } }
+```
+
+`details` appears only on `422`s. Every response carries `X-Request-ID` (reused when valid,
+generated otherwise), and each request logs exactly one JSON line (method, path, status, latency
+in ms, request id) with no personal data. Full `curl` examples — captured from the running
+stack — are in the [Spanish section](#ejemplos-con-curl); the
+[Postman collection](docs/api/customer-platform.postman_collection.json) runs them for you.
+
+### Frontend
+
+The **Customer Dashboard**: table from 768 px and cards below (no horizontal scroll); status
+filter pills with counts; real-time search over name/email, case- and accent-insensitive
+(`perez` finds "Juan Pérez"); a reusable `StatusBadge` (text + colour, WCAG-compliant contrast);
+skeleton loading, an error banner with **Retry** (in Spanish, mapped by error `code`), and two
+empty states (no customers yet vs. no results); and an accessible detail drawer (Esc / backdrop /
+button close, focus trapped and returned to its opener) that also changes the customer's status —
+not optimistically, with `aria-live` feedback. The footer states the active data source and the
+time zone of dates (UTC).
+
+| Mode        | How it is activated                     | What happens                                   |
+| ----------- | --------------------------------------- | ---------------------------------------------- |
+| Mock API    | No `PUBLIC_API_URL` (default)           | 10 in-memory customers inside SvelteKit        |
+| Real API    | `PUBLIC_API_URL=http://localhost:8000`  | The browser calls the FastAPI API directly     |
+
+### Quality
+
+`make check` runs what the CI runs: `ruff check` + `ruff format --check`, `mypy` over the whole
+backend, `svelte-check` (0 errors / 0 warnings), 102 backend tests, 177 frontend tests in 19
+files, and a production build. Backend tests use an isolated database per test and cover every
+endpoint with its error cases, the migration, the error envelope, the request id, logging and the
+seed. Frontend tests cover the pure logic, the HTTP client, the mock API, the store and component
+behaviour. The workflow `.github/workflows/ci.yml` runs all of this on every push to `main` and
+`develop` and on every pull request.
+
+### Git Flow
+
+`main` receives releases only (each merge is a tagged release: `v1.0.0`, `v1.1.0`); `develop`
+integrates; each unit of work lives on a `feature/*` branch merged with `--no-ff`; `release/*`
+prepares each version. Conventional Commits throughout, with small commits; on the backend branch
+every commit was additionally verified to pass its own suite. See the full graph with
+`git log --graph --oneline --all`, and [ADR-0005](docs/adr/0005-git-flow.md) for why.
+
+### Verified / not verified
+
+Verified on this release's commit: `make check` green; `docker compose up --build` from scratch
+(both healthy, non-root users, data persists across restarts, fresh volume with
+`SEED_ON_STARTUP=false` starts empty); every endpoint through the containers including error
+cases; the dashboard in a browser against the real backend (list, filters, search, both empty
+states, error + retry, drawer focus handling, status change including the failure path; at 375,
+768 and 1280 px); the pip alternative (`pip install -e ".[dev]"`) from an empty environment.
+
+Not verified: PostgreSQL (code is engine-agnostic, only SQLite was executed); the CI workflow on
+GitHub (syntax and action versions validated only); Safari and Firefox (Chromium only);
+architectures other than `linux/arm64`.
