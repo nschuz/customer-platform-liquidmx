@@ -1,0 +1,67 @@
+[project]
+name = "customer-api"
+version = "1.0.0"
+description = "Customer Management API (FastAPI + SQLAlchemy + SQLite)."
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "fastapi>=0.165.0",
+    "pydantic-settings>=2.16.3",
+    "pydantic[email]>=2.14.4",
+    "sqlalchemy>=2.1.9",
+    "uvicorn[standard]>=0.54.0",
+]
+
+# The dev tools are declared twice on purpose: as an extra, so that pip users can run
+# `pip install -e ".[dev]"`, and as the default dependency group, which uv installs by
+# itself (plain `uv sync` / `uv run`). pip does not read dependency groups.
+[project.optional-dependencies]
+dev = [
+    "httpx2>=2.16.2",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# A warning is a defect to fix at its cause, not something to silence here.
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app", "tests"]
+plugins = ["pydantic.mypy"]
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[[tool.mypy.overrides]]
+# Both directories are still type-checked, function bodies included; only the "every
+# function annotated" rule is dropped: Alembic generates its files and tests read better
+# with untyped fixtures.
+module = ["alembic.*", "tests.*"]
+disallow_untyped_defs = false
