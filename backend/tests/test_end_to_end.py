@@ -15,10 +15,10 @@ def test_requests_are_served_through_the_real_session_dependency(
     `guard_engine` is the database the application is wired to during tests."""
     client = TestClient(create_app(settings))
     created = client.post(
-        "/customers", json={"name": "Juan Pérez", "email": "juan.perez@example.com"}
+        "/customers", json={"name": "Juan Pérez", "email": "juan.perez@liquidmx.com"}
     )
     duplicate = client.post(
-        "/customers", json={"name": "Juan Pérez", "email": "juan.perez@example.com"}
+        "/customers", json={"name": "Juan Pérez", "email": "juan.perez@liquidmx.com"}
     )
     listed = client.get("/customers")
     fetched = client.get(f"/customers/{created.json()['id']}")

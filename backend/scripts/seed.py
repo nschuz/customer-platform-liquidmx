@@ -23,16 +23,16 @@ class SeedCustomer(NamedTuple):
 # Oldest registration first, spread over the last 60 days, so the default listing order
 # (newest first) is stable. The same table feeds the frontend's simulated API.
 SEED_CUSTOMERS: tuple[SeedCustomer, ...] = (
-    SeedCustomer("Juan Pérez", "juan.perez@example.com", "ACTIVE", days_ago=55),
-    SeedCustomer("María Fernández", "maria.fernandez@example.com", "ACTIVE", days_ago=49),
-    SeedCustomer("Carlos López", "carlos.lopez@example.com", "PENDING", days_ago=43),
-    SeedCustomer("Ana Martínez", "ana.martinez@example.com", "ACTIVE", days_ago=37),
-    SeedCustomer("Luis García", "luis.garcia@example.com", "BLOCKED", days_ago=31),
-    SeedCustomer("Laura Sánchez", "laura.sanchez@example.com", "ACTIVE", days_ago=25),
-    SeedCustomer("Pedro Gómez", "pedro.gomez@example.com", "PENDING", days_ago=19),
-    SeedCustomer("Carmen Ruiz", "carmen.ruiz@example.com", "BLOCKED", days_ago=13),
-    SeedCustomer("Javier Moreno", "javier.moreno@example.com", "ACTIVE", days_ago=7),
-    SeedCustomer("Lucía Díaz", "lucia.diaz@example.com", "PENDING", days_ago=1),
+    SeedCustomer("Juan Pérez", "juan.perez@liquidmx.com", "ACTIVE", days_ago=55),
+    SeedCustomer("María Fernández", "maria.fernandez@liquidmx.com", "ACTIVE", days_ago=49),
+    SeedCustomer("Carlos López", "carlos.lopez@liquidmx.com", "PENDING", days_ago=43),
+    SeedCustomer("Ana Martínez", "ana.martinez@liquidmx.com", "ACTIVE", days_ago=37),
+    SeedCustomer("Luis García", "luis.garcia@liquidmx.com", "BLOCKED", days_ago=31),
+    SeedCustomer("Laura Sánchez", "laura.sanchez@liquidmx.com", "ACTIVE", days_ago=25),
+    SeedCustomer("Pedro Gómez", "pedro.gomez@liquidmx.com", "PENDING", days_ago=19),
+    SeedCustomer("Carmen Ruiz", "carmen.ruiz@liquidmx.com", "BLOCKED", days_ago=13),
+    SeedCustomer("Javier Moreno", "javier.moreno@liquidmx.com", "ACTIVE", days_ago=7),
+    SeedCustomer("Lucía Díaz", "lucia.diaz@liquidmx.com", "PENDING", days_ago=1),
 )
 
 

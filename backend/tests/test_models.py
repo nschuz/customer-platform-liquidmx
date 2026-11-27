@@ -14,7 +14,7 @@ def test_new_customer_gets_its_id_and_created_at_from_the_server(engine: Engine)
     before = datetime.now(UTC)
 
     with Session(engine) as session:
-        customer = Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING")
+        customer = Customer(name="Juan Pérez", email="juan.perez@liquidmx.com", status="PENDING")
         session.add(customer)
         session.flush()
 
@@ -29,8 +29,8 @@ def test_email_is_unique_in_the_database(engine: Engine) -> None:
     with Session(engine) as session, pytest.raises(IntegrityError, match=r"customers\.email"):
         session.add_all(
             [
-                Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING"),
-                Customer(name="Juan otra vez", email="juan.perez@example.com", status="ACTIVE"),
+                Customer(name="Juan Pérez", email="juan.perez@liquidmx.com", status="PENDING"),
+                Customer(name="Juan otra vez", email="juan.perez@liquidmx.com", status="ACTIVE"),
             ]
         )
         session.flush()

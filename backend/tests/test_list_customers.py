@@ -22,11 +22,13 @@ def test_list_returns_an_empty_array_when_there_are_no_customers(client: TestCli
 
 def test_list_returns_the_newest_customer_first(client: TestClient, engine: Engine) -> None:
     add_customer(
-        engine, "Ana Martínez", "ana.martinez@example.com", created_at=NOW - timedelta(days=3)
+        engine, "Ana Martínez", "ana.martinez@liquidmx.com", created_at=NOW - timedelta(days=3)
     )
-    add_customer(engine, "Juan Pérez", "juan.perez@example.com", created_at=NOW - timedelta(days=1))
     add_customer(
-        engine, "Luis García", "luis.garcia@example.com", created_at=NOW - timedelta(days=2)
+        engine, "Juan Pérez", "juan.perez@liquidmx.com", created_at=NOW - timedelta(days=1)
+    )
+    add_customer(
+        engine, "Luis García", "luis.garcia@liquidmx.com", created_at=NOW - timedelta(days=2)
     )
 
     response = client.get("/customers")
@@ -47,10 +49,10 @@ def test_list_returns_the_newest_customer_first(client: TestClient, engine: Engi
 def test_list_breaks_created_at_ties_by_id_descending(client: TestClient, engine: Engine) -> None:
     """Two customers created at the same instant still get a stable, defined order."""
     add_customer(
-        engine, "Ana Martínez", "ana.martinez@example.com", created_at=NOW, customer_id=LOW_ID
+        engine, "Ana Martínez", "ana.martinez@liquidmx.com", created_at=NOW, customer_id=LOW_ID
     )
     add_customer(
-        engine, "Juan Pérez", "juan.perez@example.com", created_at=NOW, customer_id=HIGH_ID
+        engine, "Juan Pérez", "juan.perez@liquidmx.com", created_at=NOW, customer_id=HIGH_ID
     )
 
     response = client.get("/customers")
@@ -65,9 +67,9 @@ def test_list_breaks_created_at_ties_by_id_descending(client: TestClient, engine
 def test_list_filters_by_status(
     client: TestClient, engine: Engine, status: str, expected_name: str
 ) -> None:
-    add_customer(engine, "Juan Pérez", "juan.perez@example.com", status="ACTIVE")
-    add_customer(engine, "Ana Martínez", "ana.martinez@example.com", status="PENDING")
-    add_customer(engine, "Luis García", "luis.garcia@example.com", status="BLOCKED")
+    add_customer(engine, "Juan Pérez", "juan.perez@liquidmx.com", status="ACTIVE")
+    add_customer(engine, "Ana Martínez", "ana.martinez@liquidmx.com", status="PENDING")
+    add_customer(engine, "Luis García", "luis.garcia@liquidmx.com", status="BLOCKED")
 
     response = client.get("/customers", params={"status": status})
 
@@ -76,7 +78,7 @@ def test_list_filters_by_status(
 
 
 def test_list_returns_nothing_for_a_status_nobody_has(client: TestClient, engine: Engine) -> None:
-    add_customer(engine, "Juan Pérez", "juan.perez@example.com", status="ACTIVE")
+    add_customer(engine, "Juan Pérez", "juan.perez@liquidmx.com", status="ACTIVE")
 
     response = client.get("/customers", params={"status": "BLOCKED"})
 

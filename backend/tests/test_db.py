@@ -36,12 +36,12 @@ def test_database_errors_do_not_expose_statement_parameters(guard_engine: Engine
     with Session(guard_engine) as session:
         session.add_all(
             [
-                Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING"),
-                Customer(name="Juan Pérez", email="juan.perez@example.com", status="ACTIVE"),
+                Customer(name="Juan Pérez", email="juan.perez@liquidmx.com", status="PENDING"),
+                Customer(name="Juan Pérez", email="juan.perez@liquidmx.com", status="ACTIVE"),
             ]
         )
         with pytest.raises(IntegrityError) as failure:
             session.flush()
 
-    assert "juan.perez@example.com" not in str(failure.value)
+    assert "juan.perez@liquidmx.com" not in str(failure.value)
     assert "Juan Pérez" not in str(failure.value)

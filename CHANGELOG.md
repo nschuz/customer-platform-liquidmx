@@ -4,6 +4,15 @@ Todas las versiones notables de este proyecto se documentan aquí. El formato se
 [Keep a Changelog](https://keepachangelog.com/es-CH/1.1.0/) y el versionado en
 [SemVer](https://semver.org/lang/es/).
 
+## [1.4.0] — 2026-11-27
+
+### Cambiado
+
+- Los datos de demostración usan el dominio `@liquidmx.com` (semilla del backend, API simulada
+  del frontend, tests, ejemplos del README y colección de Postman), y los ejemplos `curl` del
+  README se recapturaron contra un arranque real con la semilla nueva.
+- La colección de Postman documenta cómo apuntarla a la demo en línea.
+
 ## [1.3.0] — 2026-11-27
 
 ### Arreglado

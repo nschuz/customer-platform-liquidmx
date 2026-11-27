@@ -8,14 +8,14 @@ vi.mock('$app/env/public', () => ({ PUBLIC_API_URL: undefined }));
 const juan: Customer = {
 	id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
 	name: 'Juan Pérez',
-	email: 'juan.perez@example.com',
+	email: 'juan.perez@liquidmx.com',
 	status: 'ACTIVE',
 	created_at: '2026-09-29T08:15:00.000Z'
 };
 const lucia: Customer = {
 	id: '3f3fc070-e756-470b-87ce-5e22114e371e',
 	name: 'Lucía Díaz',
-	email: 'lucia.diaz@example.com',
+	email: 'lucia.diaz@liquidmx.com',
 	status: 'PENDING',
 	created_at: '2026-11-23T19:50:00.000Z'
 };

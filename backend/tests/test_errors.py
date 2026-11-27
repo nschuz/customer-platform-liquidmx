@@ -14,7 +14,7 @@ from tests.factories import add_customer
 
 HEADER = "X-Request-ID"
 UNKNOWN_ID = "8f14e45f-ceea-467f-a8e0-9b1f2c3d4e5f"
-ANA = {"name": "Ana Martínez", "email": "ana.martinez@example.com"}
+ANA = {"name": "Ana Martínez", "email": "ana.martinez@liquidmx.com"}
 
 
 @pytest.fixture

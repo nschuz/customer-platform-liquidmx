@@ -12,7 +12,7 @@ def test_created_at_is_returned_in_utc_whatever_offset_it_was_read_with() -> Non
     stored = Customer(
         id=uuid.UUID("8f14e45f-ceea-467f-a8e0-9b1f2c3d4e5f"),
         name="Juan Pérez",
-        email="juan.perez@example.com",
+        email="juan.perez@liquidmx.com",
         status="ACTIVE",
         created_at=datetime(2026, 11, 27, 14, 0, tzinfo=timezone(timedelta(hours=2))),
     )

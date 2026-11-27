@@ -5,28 +5,28 @@ import { countByStatus, filterCustomers, matchesCustomer, normalizeText } from '
 const juan: Customer = {
 	id: '1',
 	name: 'Juan Pérez',
-	email: 'juan.perez@example.com',
+	email: 'juan.perez@liquidmx.com',
 	status: 'ACTIVE',
 	created_at: '2026-09-29T08:15:00.000Z'
 };
 const maria: Customer = {
 	id: '2',
 	name: 'María Fernández',
-	email: 'maria.fernandez@example.com',
+	email: 'maria.fernandez@liquidmx.com',
 	status: 'ACTIVE',
 	created_at: '2026-10-03T11:40:00.000Z'
 };
 const carlos: Customer = {
 	id: '3',
 	name: 'Carlos López',
-	email: 'carlos.lopez@example.com',
+	email: 'carlos.lopez@liquidmx.com',
 	status: 'PENDING',
 	created_at: '2026-10-08T16:05:00.000Z'
 };
 const luis: Customer = {
 	id: '4',
 	name: 'Luis García',
-	email: 'luis.garcia@example.com',
+	email: 'luis.garcia@liquidmx.com',
 	status: 'BLOCKED',
 	created_at: '2026-10-19T18:20:00.000Z'
 };
@@ -37,7 +37,7 @@ describe('normalizeText', () => {
 		['Juan Pérez', 'juan perez'],
 		['MARÍA', 'maria'],
 		['Ñandú', 'nandu'],
-		['luis.garcia@EXAMPLE.com', 'luis.garcia@example.com'],
+		['luis.garcia@LIQUIDMX.com', 'luis.garcia@liquidmx.com'],
 		['a^b`c+d', 'a^b`c+d']
 	])('normalizes %s to %s', (text, normalized) => {
 		expect(normalizeText(text)).toBe(normalized);
@@ -49,7 +49,7 @@ describe('matchesCustomer', () => {
 		{ query: 'perez', customer: juan },
 		{ query: 'JUAN', customer: juan },
 		{ query: 'fernandez', customer: maria },
-		{ query: 'garcia@example', customer: luis }
+		{ query: 'garcia@liquidmx', customer: luis }
 	])('"$query" matches $customer.name', ({ query, customer }) => {
 		expect(matchesCustomer(customer, query)).toBe(true);
 	});
