@@ -21,8 +21,12 @@
 	let query = $state('');
 	let activeStatus = $state<StatusFilter>('ALL');
 	let selectedId = $state<string | null>(null);
-	/** The "Ver detalle" button that opened the drawer. It gets the focus back when it closes. */
-	let detailOpener: HTMLElement | null = null;
+	/**
+	 * The "Ver detalle" button that opened the drawer. It gets the focus back when the drawer closes.
+	 * It is the button the click event reports, not `document.activeElement`: some browsers do not
+	 * focus a button on mouse click.
+	 */
+	let detailOpener: HTMLButtonElement | null = null;
 
 	// The counts follow the search only; the list also follows the status pill.
 	const statusCounts = $derived(countByStatus(store.customers, query));
@@ -55,9 +59,8 @@
 		void store.load();
 	}
 
-	function openDetail(customer: Customer) {
-		// Read now: once the page turns inert, the browser drops the focus from the button.
-		detailOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+	function openDetail(customer: Customer, opener: HTMLButtonElement) {
+		detailOpener = opener;
 		selectedId = customer.id;
 	}
 

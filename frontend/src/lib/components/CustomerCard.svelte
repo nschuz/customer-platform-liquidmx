@@ -5,7 +5,8 @@
 
 	let { customer, onShowDetail }: {
 		customer: Customer;
-		onShowDetail: (customer: Customer) => void;
+		/** `opener` is the button that was clicked, so that the focus can return to it. */
+		onShowDetail: (customer: Customer, opener: HTMLButtonElement) => void;
 	} = $props();
 </script>
 
@@ -26,7 +27,7 @@
 			type="button"
 			class="shrink-0 rounded-lg border border-line px-2.5 py-1 text-sm font-medium text-accent transition-colors hover:bg-page"
 			aria-label="Ver detalle de {customer.name}"
-			onclick={() => onShowDetail(customer)}
+			onclick={(event) => onShowDetail(customer, event.currentTarget)}
 		>
 			Ver detalle
 		</button>

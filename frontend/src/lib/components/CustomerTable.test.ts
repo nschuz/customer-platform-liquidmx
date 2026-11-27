@@ -34,13 +34,14 @@ describe('CustomerTable', () => {
 		}
 	});
 
-	it('opens the detail of the customer whose row was clicked', async () => {
+	it('opens the detail of the clicked row and hands over the button that was clicked', async () => {
 		const onShowDetail = vi.fn();
 		renderTable(onShowDetail);
+		const button = screen.getByRole('button', { name: 'Ver detalle de Carmen Ruiz' });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Carmen Ruiz' }));
+		await fireEvent.click(button);
 
-		expect(onShowDetail).toHaveBeenCalledExactlyOnceWith(customers[1]);
+		expect(onShowDetail).toHaveBeenCalledExactlyOnceWith(customers[1], button);
 	});
 
 	it('renders one row per customer with its data', () => {

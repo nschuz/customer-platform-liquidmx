@@ -22,12 +22,13 @@ describe('CustomerCard', () => {
 		expect(card.querySelector('time')?.getAttribute('datetime')).toBe(customer.created_at);
 	});
 
-	it('opens its detail from the Ver detalle button', async () => {
+	it('opens its detail from the Ver detalle button and hands over that button', async () => {
 		const onShowDetail = vi.fn();
 		render(CustomerCard, { customer, onShowDetail });
+		const button = screen.getByRole('button', { name: 'Ver detalle de Carmen Ruiz' });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Carmen Ruiz' }));
+		await fireEvent.click(button);
 
-		expect(onShowDetail).toHaveBeenCalledExactlyOnceWith(customer);
+		expect(onShowDetail).toHaveBeenCalledExactlyOnceWith(customer, button);
 	});
 });
