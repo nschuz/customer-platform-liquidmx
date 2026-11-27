@@ -60,8 +60,8 @@ lint: ## Lint and type-check (ruff, mypy, svelte-check)
 	@cd backend && uv run ruff check .
 	@echo "+ cd backend && uv run ruff format --check ."
 	@cd backend && uv run ruff format --check .
-	@echo "+ cd backend && uv run mypy app"
-	@cd backend && uv run mypy app
+	@echo "+ cd backend && uv run mypy"
+	@cd backend && uv run mypy
 	@echo "+ cd frontend && npm run check"
 	@cd frontend && npm run check
 

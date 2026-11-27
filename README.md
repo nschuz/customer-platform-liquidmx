@@ -315,7 +315,7 @@ Ejecuta lo mismo que el CI:
 |                   | Backend                          | Frontend                            |
 | ----------------- | -------------------------------- | ----------------------------------- |
 | Lint y formato    | `ruff check`, `ruff format --check` | —                                 |
-| Tipos             | `mypy app` (estricto)             | `svelte-check` (0 errores, 0 avisos) |
+| Tipos             | `mypy` (estricto, sobre `app`, `scripts`, `alembic` y `tests`) | `svelte-check` (0 errores, 0 avisos) |
 | Tests             | `pytest`: 102 tests               | `vitest`: 165 tests en 19 archivos  |
 | Build             | —                                | `vite build`                        |
 

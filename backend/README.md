@@ -344,9 +344,11 @@ Esa variable corresponde al entrypoint del contenedor, que ejecuta las migracion
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy app
+uv run mypy
 ```
 
+- `mypy` se ejecuta sin ruta a propósito: comprueba todos los directorios que lista `pyproject.toml`
+  (`app`, `scripts`, `alembic` y `tests`).
 - Los tests usan una base de datos propia por test (SQLite en memoria, esquema creado en un
   fixture) e inyectan la sesión con un override de dependencias. Ninguno toca `customers.db` ni
   necesita red, y pasan en cualquier orden.
@@ -471,7 +473,7 @@ nada. Para trabajar con la lista vacía, no lo ejecutes (o borra `customers.db` 
 
 Verificado, con la salida en el reporte de la tarea:
 
-- `uv run pytest` (102 tests), `ruff check`, `ruff format --check` y `mypy app`.
+- `uv run pytest` (102 tests), `ruff check`, `ruff format --check` y `mypy`.
 - Base de datos desde cero: `alembic upgrade head`, el seed dos veces (la segunda no crea nada) y
   cada endpoint con `curl`, incluidos `409`, `404`, `422`, `405`, `/health`, el eco de
   `X-Request-ID` y el preflight CORS. Salidas en este README.
