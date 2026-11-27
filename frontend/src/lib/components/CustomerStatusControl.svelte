@@ -42,7 +42,7 @@
 				bind:this={optionButtons[option]}
 				aria-pressed={status === option}
 				disabled={pending !== null}
-				class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors {status ===
+				class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60 {status ===
 				option
 					? 'border-ink bg-ink text-white'
 					: 'border-line bg-surface text-ink enabled:hover:bg-page'}"
