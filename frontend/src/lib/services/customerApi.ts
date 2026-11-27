@@ -13,6 +13,10 @@ const MOCK_BASE_URL = '/api';
 const CUSTOMERS_PATH = '/customers';
 const REQUEST_TIMEOUT_MS = 10_000;
 
+/** What the UI says when a request gets no answer. The error banner shows it as it is. */
+export const CONNECTION_ERROR_MESSAGE =
+	'No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.';
+
 /** The one place the base URL is resolved: `PUBLIC_API_URL`, or the in-app mock without it. */
 export const API_BASE_URL = PUBLIC_API_URL?.replace(/\/+$/, '') ?? MOCK_BASE_URL;
 export const IS_MOCK_API = API_BASE_URL === MOCK_BASE_URL;
@@ -158,7 +162,7 @@ function toApiError(error: unknown, signal: AbortSignal): ApiError {
 	return new ApiError({
 		status: 0,
 		code: 'NETWORK_ERROR',
-		message: 'No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.'
+		message: CONNECTION_ERROR_MESSAGE
 	});
 }
 
