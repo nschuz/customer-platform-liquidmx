@@ -11,7 +11,7 @@
 
 <li class="rounded-xl border border-line bg-surface p-4 transition-colors hover:border-gray-300">
 	<div class="flex items-center justify-between gap-3">
-		<p class="truncate font-semibold text-ink">{customer.name}</p>
+		<p class="truncate font-semibold text-ink" title={customer.name}>{customer.name}</p>
 		<StatusBadge status={customer.status} />
 	</div>
 	<p class="mt-1 truncate text-muted" title={customer.email}>{customer.email}</p>

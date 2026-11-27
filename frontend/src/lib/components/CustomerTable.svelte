@@ -32,7 +32,12 @@
 		<tbody>
 			{#each customers as customer (customer.id)}
 				<tr class="border-b border-line transition-colors last:border-b-0 hover:bg-page">
-					<td class="truncate px-1.5 py-3 font-medium text-ink lg:px-4">{customer.name}</td>
+					<td
+						class="truncate px-1.5 py-3 font-medium text-ink lg:px-4"
+						title={customer.name}
+					>
+						{customer.name}
+					</td>
 					<!-- Email and date shrink one step below lg, where five columns share little room. -->
 					<td class="truncate px-1.5 py-3 text-xs text-muted lg:px-4 lg:text-sm" title={customer.email}>
 						{customer.email}
