@@ -4,6 +4,23 @@ Todas las versiones notables de este proyecto se documentan aquí. El formato se
 [Keep a Changelog](https://keepachangelog.com/es-CH/1.1.0/) y el versionado en
 [SemVer](https://semver.org/lang/es/).
 
+## [1.2.0] — 2026-11-27
+
+### Añadido
+
+- Blueprint de Render (`render.yaml`) para desplegar los dos servicios con las imágenes Docker
+  del repo en el plan gratuito, con las variables resueltas entre ellos.
+- Sección de despliegue en Render (español e inglés) en el README: pasos, URLs y limitaciones
+  del plan gratuito.
+
+### Cambiado
+
+- El contenedor del backend honora `PORT` (con fallback a 8000): las plataformas gestionadas
+  como Render inyectan ese puerto y enrutan el tráfico a él.
+- `CORS_ORIGINS` (backend) y `PUBLIC_API_URL` (frontend) aceptan un host sin esquema y asumen
+  `https://`, que es como el blueprint de Render se pasa las URLs de cada servicio. Cubierto con
+  tests en ambos lados (`test_config.py`, `env.test.ts`).
+
 ## [1.1.0] — 2026-11-27
 
 ### Añadido

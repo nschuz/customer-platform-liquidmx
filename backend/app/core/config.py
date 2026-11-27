@@ -18,9 +18,17 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def split_origins(cls, value: object) -> object:
-        """`CORS_ORIGINS` is a comma-separated list in the environment."""
+        """`CORS_ORIGINS` is a comma-separated list in the environment.
+
+        An entry without scheme is a bare host (deployment blueprints reference other services
+        that way) and is taken as `https://`: every managed platform serves HTTPS.
+        """
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            return [
+                origin if "://" in origin else f"https://{origin}"
+                for origin in (part.strip() for part in value.split(","))
+                if origin
+            ]
         return value
 
 
