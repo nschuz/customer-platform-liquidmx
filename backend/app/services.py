@@ -11,6 +11,9 @@ from app.schemas import CustomerStatus
 
 
 class CustomerService:
+    """The use cases. It knows no HTTP and talks to storage only through `CustomerRepository`;
+    the one storage detail it is aware of is the error the database raises for a duplicate."""
+
     def __init__(self, repository: CustomerRepository) -> None:
         self.repository = repository
 

@@ -17,9 +17,13 @@ error_logger = logging.getLogger("app")
 
 
 class RequestIdMiddleware:
-    """Pure ASGI middleware: reuses the caller's `X-Request-ID` or generates one, returns it in
-    the response, leaves it on `request.state` for the exception handlers and writes one access
-    log line per request."""
+    """Pure ASGI middleware. Per request it:
+
+    * reuses the caller's `X-Request-ID` or generates one, returns it in the response and
+      leaves it on `request.state` for the exception handlers;
+    * answers errors that nobody handled with the generic 500 envelope;
+    * writes one access log line.
+    """
 
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
