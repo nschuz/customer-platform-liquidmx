@@ -6,7 +6,7 @@ son literales: salieron de ejecutar la API (ver el [README](../../README.md) par
 ## 1. Crear un cliente — `POST /customers`
 
 El caso feliz y el duplicado, que no se resuelve con una consulta previa sino con la restricción
-`UNIQUE` de la base de datos (ver el [ADR-0002](../adr/0002-sqlite-con-alembic.md)).
+`UNIQUE` de la base de datos.
 
 ```mermaid
 sequenceDiagram

@@ -21,12 +21,10 @@ services:
         value: sqlite:////data/customers.db
       - key: SEED_ON_STARTUP
         value: "true"
-      # The dashboard's public host, without scheme: the settings assume https:// for bare hosts.
+      # The dashboard's public origin, explicit: `fromService` delivered the service name
+      # without the domain, which the CORS check never matched.
       - key: CORS_ORIGINS
-        fromService:
-          type: web
-          name: customer-platform-dashboard
-          property: host
+        value: https://customer-platform-dashboard.onrender.com
 
   - type: web
     name: customer-platform-dashboard
@@ -35,10 +33,7 @@ services:
     plan: free
     healthCheckPath: /
     envVars:
-      # The API's public host, without scheme: the frontend assumes https:// for bare hosts.
-      # The browser calls the API directly with this URL, so it must be the public one.
+      # The API's public URL, explicit (see CORS_ORIGINS above): the browser calls the API
+      # directly with it.
       - key: PUBLIC_API_URL
-        fromService:
-          type: web
-          name: customer-platform-api
-          property: host
+        value: https://customer-platform-api.onrender.com

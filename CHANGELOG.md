@@ -4,6 +4,18 @@ Todas las versiones notables de este proyecto se documentan aquí. El formato se
 [Keep a Changelog](https://keepachangelog.com/es-CH/1.1.0/) y el versionado en
 [SemVer](https://semver.org/lang/es/).
 
+## [1.3.0] — 2026-11-27
+
+### Arreglado
+
+- El blueprint de Render ahora fija las URLs públicas completas de cada servicio
+  (`PUBLIC_API_URL` y `CORS_ORIGINS`) en lugar de resolverlas con `fromService`, que entregaba
+  el nombre del servicio sin dominio y dejaba el dashboard sin conexión a la API.
+
+### Eliminado
+
+- La sección de registros de decisiones de la documentación, y sus referencias.
+
 ## [1.2.0] — 2026-11-27
 
 ### Añadido
@@ -27,8 +39,6 @@ Todas las versiones notables de este proyecto se documentan aquí. El formato se
 
 - Documentación técnica en `docs/`: diagramas C4 (contexto y contenedores), diagramas de
   secuencia (crear cliente, cambiar estado, arranque del stack) y modelo de datos.
-- Cinco registros de decisiones de arquitectura (ADR) sobre capas y Repository, SQLite con
-  Alembic, el modo mock-primero del frontend, el formato de error unificado y Git Flow.
 - `docs/api/openapi.json`: especificación OpenAPI 3.1 exportada de la aplicación.
 - `docs/api/customer-platform.postman_collection.json`: colección de Postman (v2.1) con todos los
   endpoints, ejemplos de respuesta guardados (201, 200, 409, 404, 422), tests por petición y la
