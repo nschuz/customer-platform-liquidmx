@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, listCustomers } from '#lib/services/customerApi.ts';
-import { describeApiError } from './messages.ts';
+import { describeApiError, describeLoadError } from './messages.ts';
 
 // The client module reads PUBLIC_API_URL from SvelteKit's env, which only exists inside the app.
 vi.mock('$app/env/public', () => ({ PUBLIC_API_URL: undefined }));
@@ -74,6 +74,51 @@ const cases: [name: string, error: unknown, expected: string][] = [
 	['a rejection without an error', 'boom', 'Ha ocurrido un error inesperado.']
 ];
 
+const loadCases: [name: string, error: unknown, expected: string][] = [
+	[
+		'a network failure',
+		new ApiError({ status: 0, code: 'NETWORK_ERROR', message: 'Failed to fetch' }),
+		CONNECTION_MESSAGE
+	],
+	[
+		'a timeout',
+		new ApiError({ status: 0, code: 'TIMEOUT', message: 'La petición tardó demasiado.' }),
+		CONNECTION_MESSAGE
+	],
+	[
+		'a server error',
+		new ApiError({
+			status: 500,
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Internal server error.',
+			requestId: 'req-47'
+		}),
+		'No se pudieron cargar los clientes. Internal server error.'
+	],
+	[
+		'a route that is not there',
+		new ApiError({ status: 404, code: 'NOT_FOUND', message: 'The requested resource was not found.' }),
+		'No se pudieron cargar los clientes. The requested resource was not found.'
+	],
+	[
+		'a rejected request',
+		new ApiError({ status: 422, code: 'VALIDATION_ERROR', message: 'Invalid request.' }),
+		'No se pudieron cargar los clientes. Invalid request.'
+	],
+	[
+		'an answer that is not the contract',
+		new ApiError({ status: 200, code: 'INVALID_RESPONSE', message: 'El servidor devolvió una respuesta inesperada.' }),
+		'No se pudieron cargar los clientes. El servidor devolvió una respuesta inesperada.'
+	],
+	[
+		'an error that says nothing',
+		new ApiError({ status: 503, code: 'HTTP_ERROR', message: '  ' }),
+		'No se pudieron cargar los clientes.'
+	],
+	['an error that is not an ApiError', new TypeError('x is not a function'), 'Ha ocurrido un error inesperado.'],
+	['a rejection without an error', 'boom', 'Ha ocurrido un error inesperado.']
+];
+
 afterEach(() => {
 	vi.unstubAllGlobals();
 });
@@ -84,15 +129,23 @@ describe('describeApiError', () => {
 	});
 
 	it('says what the error banner says when the server cannot be reached', async () => {
-		// The banner shows `error.message`: the description must be those very words.
+		// The banner shows `describeLoadError` and the drawer `describeApiError`: without an answer
+		// from the server, both must say the same.
 		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
 		try {
 			await listCustomers();
 		} catch (error) {
 			expect(error).toBeInstanceOf(ApiError);
-			expect(describeApiError(error)).toBe((error as ApiError).message);
+			expect(describeApiError(error)).toBe(CONNECTION_MESSAGE);
+			expect(describeLoadError(error)).toBe(CONNECTION_MESSAGE);
 			return;
 		}
 		throw new Error('listCustomers should have rejected');
+	});
+});
+
+describe('describeLoadError', () => {
+	it.each(loadCases)('describes %s', (_name, error, expected) => {
+		expect(describeLoadError(error)).toBe(expected);
 	});
 });

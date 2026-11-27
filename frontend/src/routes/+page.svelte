@@ -27,6 +27,7 @@
 	// button on a mouse click.
 	let detailOpener: HTMLButtonElement | null = null;
 	let listSection = $state<HTMLElement>();
+	let searchBox = $state<HTMLDivElement>();
 
 	// The counts follow the search only; the list also follows the status pill.
 	const statusCounts = $derived(countByStatus(store.customers, query));
@@ -53,6 +54,7 @@
 	function clearFilters() {
 		activeStatus = 'ALL';
 		searchText = ''; // the search box then reports the emptied query by itself
+		searchBox?.querySelector('input')?.focus(); // the button removes itself, so the focus stays here
 	}
 
 	function retry() {
@@ -95,7 +97,7 @@
 				aria-label="Filtros y búsqueda"
 			>
 				<CustomerFilters active={activeStatus} counts={statusCounts} onChange={setStatusFilter} />
-				<div class="w-full shrink-0 lg:w-80">
+				<div class="w-full shrink-0 lg:w-80" bind:this={searchBox}>
 					<SearchInput bind:text={searchText} onSearch={setQuery} />
 				</div>
 			</section>

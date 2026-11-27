@@ -7,8 +7,10 @@ Es la mitad backend de `customer-platform` y funciona por sí sola.
 
 - Python 3.12 o superior.
 - [uv](https://docs.astral.sh/uv/) (recomendado) o pip.
+- O bien Docker con Compose v2, para ejecutarla en un contenedor (ver [Con Docker](#con-docker)).
 
-Todos los comandos de este README se ejecutan desde este directorio (`backend/`).
+Todos los comandos de este README se ejecutan desde este directorio (`backend/`), salvo los de
+«Con Docker», que se ejecutan desde la raíz del repositorio.
 
 ## Puesta en marcha
 
@@ -37,6 +39,27 @@ alembic upgrade head
 python -m scripts.seed
 uvicorn app.main:app --reload
 ```
+
+### Con Docker
+
+Desde la raíz del repositorio:
+
+```bash
+docker compose up --build
+```
+
+Levanta esta API y el frontend. La imagen (`Dockerfile`) se construye en dos etapas, una instala
+las dependencias y la otra guarda solo ese entorno virtual y el código, y corre con un usuario
+distinto de root. En cada arranque, `entrypoint.sh` aplica las migraciones y ejecuta el seed, salvo
+que `SEED_ON_STARTUP=false`. La API queda en <http://localhost:8000>.
+
+La base de datos SQLite vive en un volumen con nombre (`/data/customers.db` dentro del contenedor):
+los datos sobreviven a `docker compose restart` y a `docker compose down`, y se borran con
+`docker compose down -v`. Por eso `SEED_ON_STARTUP=false` solo da una lista vacía si el volumen no
+tiene datos: ejecuta antes `docker compose down -v`.
+
+Las variables de Compose (`BACKEND_PORT`, `CORS_ORIGINS`, `SEED_ON_STARTUP`…) se documentan en el
+[`.env.example`](../.env.example) y en el [README](../README.md) de la raíz.
 
 ## Endpoints
 
@@ -336,7 +359,8 @@ Se leen del entorno y, si existe, de un archivo `.env` en este directorio (ver `
 El entorno tiene prioridad sobre el archivo.
 
 El seed es solo un script: la aplicación no siembra datos al arrancar ni lee `SEED_ON_STARTUP`.
-Esa variable corresponde al entrypoint del contenedor, que ejecuta las migraciones y el seed.
+Esa variable corresponde al entrypoint del contenedor (ver [Con Docker](#con-docker)), que ejecuta
+las migraciones y el seed.
 
 ## Tests y calidad
 
@@ -344,14 +368,18 @@ Esa variable corresponde al entrypoint del contenedor, que ejecuta las migracion
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy app
+uv run mypy
 ```
 
+- `mypy` se ejecuta sin ruta a propósito: comprueba todos los directorios que lista `pyproject.toml`
+  (`app`, `scripts`, `alembic` y `tests`).
 - Los tests usan una base de datos propia por test (SQLite en memoria, esquema creado en un
   fixture) e inyectan la sesión con un override de dependencias. Ninguno toca `customers.db` ni
   necesita red, y pasan en cualquier orden.
 - Tampoco dependen del entorno: la configuración que usan (`cors_origins`, `database_url`) la fija
-  un fixture, así que las variables de entorno y el archivo `.env` no cambian el resultado.
+  un fixture, así que variables como `CORS_ORIGINS` no cambian el resultado. La única excepción es
+  un `DATABASE_URL` con un motor cuyo driver no esté instalado, que falla al importar la
+  aplicación antes de llegar a los fixtures.
 - Un test ejecuta la CLI real de Alembic sobre un archivo temporal y comprueba que el esquema
   migrado es el que declaran los modelos. Otro arranca la aplicación con sus dependencias reales
   sobre un archivo SQLite.
@@ -462,21 +490,25 @@ nada. Para trabajar con la lista vacía, no lo ejecutes (o borra `customers.db` 
 - **`500` en el middleware, no en un handler registrado.** Starlette atiende los errores no
   controlados en su middleware más externo, por fuera de CORS y del `X-Request-ID`: un navegador
   no podría leer esa respuesta. El middleware responde antes, y el traceback va al log.
-- **Sin máquina de estados para `status`.** Cualquier estado válido puede asignarse, como pide el
-  enunciado.
+- **Sin máquina de estados para `status`.** Cualquier estado válido puede asignarse desde
+  cualquier otro: no hay transiciones prohibidas.
 
 ## Qué se verificó y qué no
 
-Verificado, con la salida en el reporte de la tarea:
+Verificado:
 
-- `uv run pytest` (102 tests), `ruff check`, `ruff format --check` y `mypy app`.
+- `uv run pytest` (102 tests), `ruff check`, `ruff format --check` y `mypy`.
 - Base de datos desde cero: `alembic upgrade head`, el seed dos veces (la segunda no crea nada) y
   cada endpoint con `curl`, incluidos `409`, `404`, `422`, `405`, `/health`, el eco de
   `X-Request-ID` y el preflight CORS. Salidas en este README.
 - Que el esquema migrado tiene un índice único en `customers.email` (con el módulo `sqlite3`).
 - Que `uvicorn` escribe exactamente una línea JSON por petición, con y sin `--reload`.
+- Docker, a través de los contenedores: la imagen se construye y el servicio llega a `healthy`;
+  cada endpoint responde igual que en local, con las migraciones y el seed aplicados por el
+  `entrypoint`; los datos sobreviven a `docker compose restart`; un volumen nuevo arranca con la
+  lista vacía cuando `SEED_ON_STARTUP=false`; y el frontend pasa de la API simulada al backend real
+  al rearrancar su contenedor, sin recompilar la imagen.
 
 No verificado:
 
 - PostgreSQL (no había instancia disponible).
-- Docker y `docker compose`: el `Dockerfile` y el compose se construyen en otra rama.

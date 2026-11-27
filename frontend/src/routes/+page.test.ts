@@ -138,4 +138,21 @@ describe('Customer Dashboard page', () => {
 		const [firstShown] = screen.getAllByRole('button', { name: 'Ver detalle de Lucía Díaz' });
 		expect(document.activeElement).toBe(firstShown);
 	});
+
+	it('leaves the focus on the search box when the filters are cleared', async () => {
+		serveApi();
+		render(Page);
+		const search = await screen.findByRole('searchbox', { name: 'Buscar cliente' });
+
+		// A search that matches nothing shows the empty state and its "Limpiar filtros" button.
+		await fireEvent.input(search, { target: { value: 'zzz' } });
+		const clearFilters = await screen.findByRole('button', { name: 'Limpiar filtros' });
+		clearFilters.focus();
+
+		await fireEvent.click(clearFilters);
+
+		expect(screen.queryByRole('button', { name: 'Limpiar filtros' })).toBeNull();
+		expect((search as HTMLInputElement).value).toBe('');
+		expect(document.activeElement).toBe(search);
+	});
 });

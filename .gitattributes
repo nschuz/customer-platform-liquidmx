@@ -1,0 +1,8 @@
+# Line endings are decided here, not by each clone's configuration: a file that Git detects as
+# text is stored with LF in the repository, on every platform.
+* text=auto
+
+# Shell scripts are also checked out with LF. Git for Windows defaults to core.autocrlf=true,
+# which would end the shebang of backend/entrypoint.sh with a carriage return: the image builds,
+# but the container fails to start.
+*.sh text eol=lf

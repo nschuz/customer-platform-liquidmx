@@ -36,8 +36,10 @@ jobs:
       - name: Check the format (ruff)
         run: uv run ruff format --check .
 
+      # Without a path, mypy checks every directory that pyproject.toml lists: app, scripts, alembic
+      # and tests.
       - name: Type-check (mypy)
-        run: uv run mypy app
+        run: uv run mypy
 
       - name: Test (pytest)
         run: uv run pytest

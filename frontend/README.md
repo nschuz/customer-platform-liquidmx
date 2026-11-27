@@ -15,7 +15,7 @@ la mitad de frontend de `customer-platform`; el backend (FastAPI) vive en `../ba
 ## Ejecución
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
@@ -86,7 +86,7 @@ src/
     utils/search.ts             # Búsqueda: normalización, filtro y contadores
     utils/formatters.ts         # formatDateTime
     utils/guards.ts             # asRecord: lee JSON sin tipos
-    utils/messages.ts           # describeApiError: el error en español, según su código
+    utils/messages.ts           # describeApiError, describeLoadError: cada error, en español
     utils/focus.ts              # Trampa de Tab y foco al primer botón visible
     components/                 # Un componente por pieza de la interfaz
     server/                     # Solo servidor: datos y reglas de la API simulada
@@ -169,8 +169,8 @@ resuelve con la condición `browser`, que no debe llegar al build de la app.
 
 ## Versiones y convenciones
 
-El scaffolding oficial (`npx sv create`) instaló versiones mayores distintas a las del enunciado.
-El código sigue a las instaladas:
+El scaffolding oficial (`npx sv create`) instaló versiones mayores cuyas convenciones difieren de
+las de SvelteKit 2. El código sigue a las instaladas:
 
 | Paquete     | Versión | Convención que cambia                                                         |
 | ----------- | ------- | ----------------------------------------------------------------------------- |

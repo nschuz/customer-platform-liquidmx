@@ -6,11 +6,12 @@ import { SEED_CUSTOMERS } from './seedCustomers.ts';
 /** The in-memory table of the mock. It lives for as long as the server process. */
 let customers: Customer[] = MOCK_EMPTY ? [] : [...SEED_CUSTOMERS];
 
-/** Newest first, ties broken by id, like the backend does. */
+/** Newest first. A tie between identical timestamps is broken by id, the greatest first, as the
+ * backend does (`created_at DESC, id DESC`). */
 export function listCustomers(status: CustomerStatus | null): Customer[] {
 	return customers
 		.filter((customer) => status === null || customer.status === status)
-		.sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
+		.sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id));
 }
 
 export function getCustomer(id: string): Customer {
