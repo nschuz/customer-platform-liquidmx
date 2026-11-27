@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { customersStore } from '#lib/customers.svelte.ts';
 import type { Customer } from '#lib/types/customer.ts';
@@ -7,32 +7,35 @@ import Page from './+page.svelte';
 // The page imports the store, which imports the API client, which reads SvelteKit's env.
 vi.mock('$app/env/public', () => ({ PUBLIC_API_URL: undefined }));
 
-const customers: Customer[] = [
-	{
-		id: '6a25261c-26e6-4bc1-b4ba-fd12643c1150',
-		name: 'Carmen Ruiz',
-		email: 'carmen.ruiz@example.com',
-		status: 'BLOCKED',
-		created_at: '2026-11-09T15:55:00.000Z'
-	},
-	{
-		id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
-		name: 'Juan Pérez',
-		email: 'juan.perez@example.com',
-		status: 'ACTIVE',
-		created_at: '2026-09-29T08:15:00.000Z'
-	}
-];
-const [carmen, juan] = customers;
+const carmen: Customer = {
+	id: '6a25261c-26e6-4bc1-b4ba-fd12643c1150',
+	name: 'Carmen Ruiz',
+	email: 'carmen.ruiz@example.com',
+	status: 'BLOCKED',
+	created_at: '2026-11-09T15:55:00.000Z'
+};
+const juan: Customer = {
+	id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
+	name: 'Juan Pérez',
+	email: 'juan.perez@example.com',
+	status: 'ACTIVE',
+	created_at: '2026-09-29T08:15:00.000Z'
+};
+const customers = [carmen, juan];
+const juanBlocked: Customer = { ...juan, status: 'BLOCKED' };
 
-/** Serves the list, and answers a status change with the customer already updated. */
+/** Serves the list, and leaves the status change unanswered until the test says so. */
 function serveApi() {
-	const fetchMock = vi.fn<typeof fetch>((_input, init) => {
-		const body = init?.method === 'PATCH' ? { ...juan, status: 'BLOCKED' } : customers;
-		return Promise.resolve(Response.json(body));
-	});
+	let answerPatch!: (response: Response) => void;
+	const fetchMock = vi.fn<typeof fetch>((_input, init) =>
+		init?.method === 'PATCH'
+			? new Promise<Response>((resolve) => {
+					answerPatch = resolve;
+				})
+			: Promise.resolve(Response.json(customers))
+	);
 	vi.stubGlobal('fetch', fetchMock);
-	return fetchMock;
+	return { fetchMock, answerPatch: (body: Customer = juanBlocked) => answerPatch(Response.json(body)) };
 }
 
 afterEach(() => {
@@ -57,7 +60,7 @@ describe('Customer Dashboard page', () => {
 	});
 
 	it('sends the status chosen in the drawer to the store, for the customer that is open', async () => {
-		const fetchMock = serveApi();
+		const { fetchMock } = serveApi();
 		const updateStatus = vi.spyOn(customersStore, 'updateStatus');
 		render(Page);
 
@@ -73,10 +76,36 @@ describe('Customer Dashboard page', () => {
 		const [url, init] = fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH') ?? [];
 		expect(url).toBe(`/api/customers/${juan.id}/status`);
 		expect(init).toMatchObject({ method: 'PATCH', body: JSON.stringify({ status: 'BLOCKED' }) });
+	});
 
-		// The list follows the answer of the server.
-		await waitFor(() => {
-			expect(screen.getByRole('row', { name: /Juan Pérez/ }).textContent).toContain('Bloqueado');
-		});
+	it('changes nothing until the server answers, then the list, the counts and the drawer', async () => {
+		const { answerPatch } = serveApi();
+		render(Page);
+		const row = () => screen.getByRole('row', { name: /Juan Pérez/ }).textContent;
+		const blockedCount = () =>
+			screen.getByRole('button', { name: /^Bloqueados/ }).textContent?.replace(/\D/g, '');
+
+		const [opener] = await screen.findAllByRole('button', { name: 'Ver detalle de Juan Pérez' });
+		await fireEvent.click(opener);
+		const dialog = () => screen.getByRole('dialog', { name: 'Juan Pérez' });
+		await fireEvent.click(within(dialog()).getByRole('button', { name: 'Bloqueado' }));
+
+		// Pending: the option being saved says so, and nothing else has moved.
+		expect(within(dialog()).getByRole('button', { name: 'Guardando…' })).toBeTruthy();
+		expect(row()).toContain('Activo');
+		expect(blockedCount()).toBe('1');
+		expect(screen.queryByText('Estado actualizado a Bloqueado.')).toBeNull();
+
+		answerPatch();
+
+		await screen.findByText('Estado actualizado a Bloqueado.');
+		expect(row()).toContain('Bloqueado');
+		expect(blockedCount()).toBe('2');
+		const option = (name: string) =>
+			within(dialog()).getByRole<HTMLButtonElement>('button', { name });
+		expect(option('Bloqueado').disabled).toBe(false);
+		expect(within(dialog()).getAllByRole('button', { pressed: true })).toEqual([
+			option('Bloqueado')
+		]);
 	});
 });

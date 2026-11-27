@@ -4,11 +4,11 @@
 		type Customer,
 		type CustomerStatus
 	} from '#lib/types/customer.ts';
+	import { trapTabKey } from '#lib/utils/focus.ts';
 	import { formatDateTime } from '#lib/utils/formatters.ts';
+	import { describeApiError } from '#lib/utils/messages.ts';
 	import CustomerStatusControl from './CustomerStatusControl.svelte';
 	import StatusBadge from './StatusBadge.svelte';
-
-	const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 	let { customer, onClose, onStatusChange }: {
 		customer: Customer;
@@ -16,6 +16,27 @@
 		/** Saves the status of the customer shown; rejects when the server did not accept it. */
 		onStatusChange: (status: CustomerStatus) => Promise<void>;
 	} = $props();
+
+	/** The outcome of the last change, and the customer it belongs to. */
+	let outcome = $state<{ customerId: string; notice: string; error: string | null } | null>(null);
+	let pendingStatus = $state<CustomerStatus | null>(null);
+	/** Null when the outcome belongs to a customer that is no longer shown. */
+	const feedback = $derived(outcome?.customerId === customer.id ? outcome : null);
+
+	/** Not optimistic: the drawer shows the new status when `customer` comes back with it. */
+	async function changeStatus(status: CustomerStatus) {
+		const { id: customerId } = customer; // the customer shown may be another one by the time of the answer
+		pendingStatus = status;
+		outcome = null;
+		try {
+			await onStatusChange(status);
+			outcome = { customerId, notice: `Estado actualizado a ${STATUS_LABELS[status]}.`, error: null };
+		} catch (cause) {
+			outcome = { customerId, notice: '', error: describeApiError(cause) };
+		} finally {
+			pendingStatus = null;
+		}
+	}
 
 	let closeButton = $state<HTMLButtonElement>();
 
@@ -33,25 +54,6 @@
 	function handleWindowKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') onClose();
 	}
-
-	/** Tab and Shift+Tab wrap around inside the drawer instead of leaving it. */
-	function handlePanelKeydown(event: KeyboardEvent & { currentTarget: HTMLElement }) {
-		if (event.key !== 'Tab') return;
-		const focusable = [...event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE)];
-		const first = focusable[0];
-		const last = focusable[focusable.length - 1];
-		if (!first || !last) return;
-
-		// The panel itself (tabindex -1) holds the focus after a click on its content; leaving it
-		// would be leaving the drawer too.
-		const active = document.activeElement;
-		const leaves =
-			active === event.currentTarget || (event.shiftKey ? active === first : active === last);
-		if (leaves) {
-			event.preventDefault();
-			(event.shiftKey ? last : first).focus();
-		}
-	}
 </script>
 
 <svelte:window onkeydown={handleWindowKeydown} />
@@ -64,7 +66,7 @@
 		aria-labelledby="customer-detail-title"
 		tabindex="-1"
 		class="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-surface shadow-xl motion-safe:animate-slide-in"
-		onkeydown={handlePanelKeydown}
+		onkeydown={trapTabKey}
 	>
 		<header class="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
 			<div class="min-w-0">
@@ -121,7 +123,16 @@
 		</dl>
 
 		<div class="border-t border-line px-6 py-4">
-			<CustomerStatusControl status={customer.status} onChange={onStatusChange} />
+			<CustomerStatusControl
+				status={customer.status}
+				pending={pendingStatus}
+				onChange={changeStatus}
+			/>
+			{#if feedback?.error}
+				<p role="alert" class="mt-3 text-sm text-red-900">{feedback.error}</p>
+			{/if}
+			<!-- Always in the DOM and empty when there is nothing to say, so that its changes are spoken. -->
+			<p class="sr-only" aria-live="polite">{feedback?.notice ?? ''}</p>
 		</div>
 	</div>
 </div>

@@ -69,6 +69,7 @@
 	</div>
 </fieldset>
 
-<!-- Outside the busy group, which holds back what changes inside it, and always in the DOM, empty
-     when idle: a region that only appears with its text is often not announced. -->
-<p class="sr-only" role="status" aria-live="polite">{pending !== null ? PENDING_LABEL : ''}</p>
+<!-- A status region, so polite: it says that the saving is under way. It sits outside the busy
+     group, which holds back what changes inside it, and is always in the DOM, empty when idle: a
+     region that only appears with its text is often not announced. -->
+<p class="sr-only" role="status">{pending !== null ? PENDING_LABEL : ''}</p>
