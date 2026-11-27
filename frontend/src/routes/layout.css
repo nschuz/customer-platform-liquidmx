@@ -28,8 +28,14 @@
 	}
 }
 
-/* One visible focus ring for every control, instead of repeating it on each element. */
 @layer base {
+	/* The scrollbar keeps its space even when the scroll is locked for the drawer, so the page
+	   does not shift sideways when the drawer opens or closes. */
+	html {
+		scrollbar-gutter: stable;
+	}
+
+	/* One visible focus ring for every control, instead of repeating it on each element. */
 	:focus-visible {
 		outline: 2px solid var(--color-accent);
 		outline-offset: 2px;
