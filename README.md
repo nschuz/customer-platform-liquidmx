@@ -419,6 +419,33 @@ Ninguna es un secreto y todas tienen un valor por defecto. Cada archivo document
 | [`backend/.env.example`](backend/.env.example) | `DATABASE_URL`, `CORS_ORIGINS`                                         |
 | [`frontend/.env.example`](frontend/.env.example) | `PUBLIC_API_URL`, `MOCK_EMPTY`                                         |
 
+## Despliegue en Render (gratuito)
+
+El repositorio incluye un blueprint ([`render.yaml`](render.yaml)) que despliega los dos
+servicios con las imágenes Docker del propio repo:
+
+- **API**: `https://customer-platform-api.onrender.com` · Swagger interactivo en **`/docs`** y
+  OpenAPI cruda en `/openapi.json`.
+- **Dashboard**: `https://customer-platform-dashboard.onrender.com` (configurado para llamar a la
+  API real).
+
+Pasos (una sola vez, ~5 minutos):
+
+1. Crea una cuenta gratuita en [render.com](https://render.com) (se puede entrar con GitHub).
+2. New **+** → **Blueprint** → elige el repositorio. Render lee `render.yaml` y crea los dos
+   servicios con sus variables ya resueltas (la URL de cada uno para el otro).
+3. Espera a que ambos terminen el build (el primero tarda unos minutos). Listo.
+
+Limitaciones del plan gratuito, por diseño: los servicios **duermen** tras ~15 min sin tráfico
+(el primer golpe tarda 30–60 s en despertar) y **no hay disco persistente**, así que la base
+SQLite se recrea y se siembra en cada despliegue (los clientes creados a mano se pierden). Para
+una demo eso es suficiente; con disco de pago o PostgreSQL gestionado (`DATABASE_URL`) el resto
+no cambia.
+
+Notas técnicas: Render inyecta `PORT` y el contenedor del backend lo honora; los orígenes CORS
+y `PUBLIC_API_URL` aceptan un host sin esquema porque el blueprint se pasa los hosts de cada
+servicio (se asume `https://`).
+
 ## Qué se verificó y qué no
 
 Verificado sobre el commit de este release:
@@ -571,6 +598,28 @@ integrates; each unit of work lives on a `feature/*` branch merged with `--no-ff
 prepares each version. Conventional Commits throughout, with small commits; on the backend branch
 every commit was additionally verified to pass its own suite. See the full graph with
 `git log --graph --oneline --all`, and [ADR-0005](docs/adr/0005-git-flow.md) for why.
+
+### Deploying to Render (free)
+
+The repository ships a blueprint ([`render.yaml`](render.yaml)) that deploys both services from
+the repo's own Docker images:
+
+- **API**: `https://customer-platform-api.onrender.com` · interactive Swagger at **`/docs`** and
+  the raw OpenAPI document at `/openapi.json`.
+- **Dashboard**: `https://customer-platform-dashboard.onrender.com` (wired to call the real API).
+
+Steps (once, ~5 minutes): create a free [render.com](https://render.com) account (GitHub login
+works) → **New + → Blueprint** → pick this repository → wait for the builds. The blueprint
+resolves each service's URL for the other.
+
+Free-plan limits, by design: services **sleep** after ~15 min without traffic (first request
+takes 30–60 s to wake) and there is **no persistent disk**, so SQLite is recreated and re-seeded
+on every deploy (hand-created customers are lost). Fine for a demo; a paid disk or a managed
+PostgreSQL (`DATABASE_URL`) changes nothing else.
+
+Technical notes: Render injects `PORT` and the backend container honours it; CORS origins and
+`PUBLIC_API_URL` accept a bare host because the blueprint passes each service's host that way
+(`https://` is assumed).
 
 ### Verified / not verified
 

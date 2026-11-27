@@ -1,0 +1,44 @@
+# Render Blueprint: the two services of the customer platform, from the repo's own images.
+# Docs: https://render.com/docs/blueprints — deploy it with "New +" → "Blueprint" on this repo.
+#
+# Free plan notes:
+# - The services sleep after ~15 min without traffic and take ~30-60 s to wake up.
+# - There is no persistent disk on the free plan: the SQLite database lives in the container's
+#   filesystem, so it is recreated (and re-seeded with the 10 demo customers) on every deploy.
+#   The entrypoint runs the migrations and the seed on start, so the demo always has data;
+#   anything created by hand is lost on each deploy.
+
+services:
+  - type: web
+    name: customer-platform-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # SQLite inside the container (see the note above about the free plan).
+      - key: DATABASE_URL
+        value: sqlite:////data/customers.db
+      - key: SEED_ON_STARTUP
+        value: "true"
+      # The dashboard's public host, without scheme: the settings assume https:// for bare hosts.
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: customer-platform-dashboard
+          property: host
+
+  - type: web
+    name: customer-platform-dashboard
+    runtime: docker
+    rootDir: frontend
+    plan: free
+    healthCheckPath: /
+    envVars:
+      # The API's public host, without scheme: the frontend assumes https:// for bare hosts.
+      # The browser calls the API directly with this URL, so it must be the public one.
+      - key: PUBLIC_API_URL
+        fromService:
+          type: web
+          name: customer-platform-api
+          property: host
