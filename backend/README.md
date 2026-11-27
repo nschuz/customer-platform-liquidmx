@@ -70,7 +70,8 @@ curl -s "$URL/health"
 {"status":"ok"}
 ```
 
-La cabecera `X-Request-ID`: si la petición la lleva, se reutiliza; si no, se genera una:
+La cabecera `X-Request-ID`: se reutiliza la de la petición cuando es un identificador válido
+(de 1 a 128 letras, dígitos, `.`, `_` o `-`, es decir `^[A-Za-z0-9._-]{1,128}$`):
 
 ```bash
 curl -s -i -H "X-Request-ID: demo-123" "$URL/health"
@@ -83,6 +84,25 @@ server: uvicorn
 content-length: 15
 content-type: application/json
 x-request-id: demo-123
+vary: Origin
+
+{"status":"ok"}
+```
+
+Si falta o no es válido, se genera una nueva y el valor recibido no se devuelve nunca (tampoco
+aparece en los logs):
+
+```bash
+curl -s -i -H 'X-Request-ID: demo 123/abc' "$URL/health"
+```
+
+```
+HTTP/1.1 200 OK
+date: Fri, 27 Nov 2026 19:26:07 GMT
+server: uvicorn
+content-length: 15
+content-type: application/json
+x-request-id: c2e727f1b3f9429ba5bd4253ca4b913b
 vary: Origin
 
 {"status":"ok"}
@@ -371,10 +391,12 @@ Una petición recorre router → servicio → repositorio:
 
 ### Middleware
 
-`RequestIdMiddleware` (ASGI puro) hace tres cosas por petición: reutilizar o generar el
-`X-Request-ID` y devolverlo, escribir una línea de log JSON (método, ruta, estado, latencia en ms
-y `request_id`), y responder un `500` genérico a los errores que nadie manejó. Corre por dentro
-del middleware de CORS para que ese `500` lleve las cabeceras CORS.
+`RequestIdMiddleware` (ASGI puro) hace tres cosas por petición: reutilizar el `X-Request-ID` de la
+petición cuando es un identificador válido (`^[A-Za-z0-9._-]{1,128}$`) o generar uno nuevo, y
+devolverlo; escribir una línea de log JSON (método, ruta, estado, latencia en ms y `request_id`);
+y responder un `500` genérico a los errores que nadie manejó, registrando su traceback con el
+mismo `request_id`. Corre por dentro del middleware de CORS para que ese `500` lleve las cabeceras
+CORS.
 
 El logging se configura en el lifespan, una vez por proceso y después de que uvicorn configure
 los suyos: un único handler JSON en el logger raíz y el access log de uvicorn desactivado, de

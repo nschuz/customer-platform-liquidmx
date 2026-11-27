@@ -1,6 +1,7 @@
 """Request id middleware: one id per request, echoed back and attached to everything it logs."""
 
 import logging
+import re
 import time
 import uuid
 
@@ -12,15 +13,27 @@ from app.core.exceptions import internal_error_response
 from app.core.logging import ACCESS_LOGGER
 
 REQUEST_ID_HEADER = "x-request-id"
+# A request id is a short, plain token. Anything else (whitespace, control characters, header
+# syntax, huge values) would be written into a response header, an error body and the logs.
+REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
 logger = logging.getLogger(ACCESS_LOGGER)
 error_logger = logging.getLogger("app")
+
+
+def resolve_request_id(incoming: str | None) -> str:
+    """The caller's id when it is well formed; a fresh one otherwise. A rejected value is never
+    echoed."""
+    if incoming and REQUEST_ID_PATTERN.fullmatch(incoming):
+        return incoming
+    return uuid.uuid4().hex
 
 
 class RequestIdMiddleware:
     """Pure ASGI middleware. Per request it:
 
-    * reuses the caller's `X-Request-ID` or generates one, returns it in the response and
-      leaves it on `request.state` for the exception handlers;
+    * reuses the caller's `X-Request-ID` when it is well formed (`REQUEST_ID_PATTERN`) and
+      generates one otherwise, returns it in the response and leaves it on `request.state` for
+      the exception handlers;
     * answers errors that nobody handled with the generic 500 envelope;
     * writes one access log line.
     """
@@ -34,7 +47,7 @@ class RequestIdMiddleware:
             return
 
         request = Request(scope)
-        request_id = request.headers.get(REQUEST_ID_HEADER) or uuid.uuid4().hex
+        request_id = resolve_request_id(request.headers.get(REQUEST_ID_HEADER))
         request.state.request_id = request_id
         started = time.perf_counter()
         status_code = 500  # what a request ends up as when the application dies before answering
