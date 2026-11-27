@@ -6,9 +6,10 @@
 .env
 .venv
 
-# Caches
-__pycache__/
-*.py[cod]
+# Caches. Unlike .gitignore, a pattern here only matches at the root of the context unless it
+# starts with **/, and __pycache__ directories appear inside every package.
+**/__pycache__/
+**/*.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
