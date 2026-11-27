@@ -6,17 +6,14 @@ from sqlalchemy import Engine, event
 from app import db
 
 
-def test_get_session_returns_its_connection_when_the_request_ends(
-    monkeypatch: pytest.MonkeyPatch, file_engine: Engine
-) -> None:
+def test_get_session_returns_its_connection_when_the_request_ends(guard_engine: Engine) -> None:
     """A session that is never closed would keep a pooled connection out of the pool."""
-    monkeypatch.setattr(db, "engine", file_engine)
     in_use: list[object] = []  # DBAPI connections currently checked out of the pool
     event.listen(
-        file_engine, "checkout", lambda dbapi_connection, *_: in_use.append(dbapi_connection)
+        guard_engine, "checkout", lambda dbapi_connection, *_: in_use.append(dbapi_connection)
     )
     event.listen(
-        file_engine, "checkin", lambda dbapi_connection, *_: in_use.remove(dbapi_connection)
+        guard_engine, "checkin", lambda dbapi_connection, *_: in_use.remove(dbapi_connection)
     )
 
     dependency = db.get_session()
