@@ -5,7 +5,7 @@
 
 ## Contexto
 
-El desarrollo lo hace una sola persona con agentes, pero "uso correcto de Git" es un criterio
+El desarrollo lo hace una sola persona, pero "uso correcto de Git" es un criterio
 explícito de evaluación y el historial se va a publicar en un remote.
 
 ## Decisión
