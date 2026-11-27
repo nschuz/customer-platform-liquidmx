@@ -5,6 +5,12 @@
 
 **Español** · [English below](#english)**
 
+**Demo en vivo** (Render, plan gratuito — si estaba dormida, el primer golpe tarda ~30–60 s en
+despertar):
+
+- **Dashboard**: <https://customer-platform-dashboard.onrender.com>
+- **API + Swagger interactivo**: <https://customer-platform-api.onrender.com/docs>
+
 API para administrar clientes de una plataforma financiera y el dashboard que la consume. Un solo
 repositorio con dos partes: el backend en **Python / FastAPI** y el frontend en
 **SvelteKit / TypeScript**. Cada mitad funciona por sí sola y, usadas juntas, forman el flujo
@@ -12,7 +18,7 @@ completo.
 
 Documentación adicional en [`docs/`](docs/): [arquitectura C4](docs/architecture/c4.md),
 [diagramas de secuencia](docs/architecture/sequences.md), [modelo de datos](docs/data/model.md),
-[decisiones (ADR)](docs/adr/), [OpenAPI exportada](docs/api/openapi.json) y una
+[OpenAPI exportada](docs/api/openapi.json) y una
 [colección de Postman](docs/api/customer-platform.postman_collection.json) lista para importar.
 
 | Parte      | Qué es                                                                  | Tecnología                                             |
@@ -477,6 +483,11 @@ No verificado:
 
 ## English
 
+**Live demo** (Render, free plan — if it was asleep, the first request takes ~30–60 s to wake):
+
+- **Dashboard**: <https://customer-platform-dashboard.onrender.com>
+- **API + interactive Swagger**: <https://customer-platform-api.onrender.com/docs>
+
 API to manage customers of a financial platform, plus the dashboard that consumes it. One
 repository, two halves: the backend in **Python / FastAPI** and the frontend in
 **SvelteKit / TypeScript**. Each half works on its own; together they form the full flow.
@@ -490,7 +501,7 @@ repository, two halves: the backend in **Python / FastAPI** and the frontend in
 
 More documentation in [`docs/`](docs/): [C4 architecture](docs/architecture/c4.md),
 [sequence diagrams](docs/architecture/sequences.md), [data model](docs/data/model.md),
-[ADRs](docs/adr/), [exported OpenAPI](docs/api/openapi.json) and a
+[exported OpenAPI](docs/api/openapi.json) and a
 [ready-to-import Postman collection](docs/api/customer-platform.postman_collection.json).
 
 ### Requirements
@@ -593,11 +604,11 @@ behaviour. The workflow `.github/workflows/ci.yml` runs all of this on every pus
 
 ### Git Flow
 
-`main` receives releases only (each merge is a tagged release: `v1.0.0`, `v1.1.0`); `develop`
-integrates; each unit of work lives on a `feature/*` branch merged with `--no-ff`; `release/*`
-prepares each version. Conventional Commits throughout, with small commits; on the backend branch
-every commit was additionally verified to pass its own suite. See the full graph with
-`git log --graph --oneline --all`, and [ADR-0005](docs/adr/0005-git-flow.md) for why.
+`main` receives releases only (each merge is a tagged release: `v1.0.0`, `v1.1.0`, `v1.2.0`);
+`develop` integrates; each unit of work lives on a `feature/*` branch merged with `--no-ff`;
+`release/*` prepares each version. Conventional Commits throughout, with small commits; on the
+backend branch every commit was additionally verified to pass its own suite. See the full graph
+with `git log --graph --oneline --all`.
 
 ### Deploying to Render (free)
 
