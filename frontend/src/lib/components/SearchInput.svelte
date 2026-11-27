@@ -23,6 +23,14 @@
 		}, DEBOUNCE_MS);
 		return () => clearTimeout(timer);
 	});
+
+	let input = $state<HTMLInputElement>();
+
+	/** The clear button removes itself, so the focus would fall to the page. It goes to the input. */
+	function clearSearch() {
+		text = '';
+		input?.focus();
+	}
 </script>
 
 <search class="relative block">
@@ -39,9 +47,10 @@
 		<circle cx="11" cy="11" r="7" />
 		<path d="m20 20-3.5-3.5" />
 	</svg>
-	<input
-		id="customer-search"
-		type="text"
+		<input
+			id="customer-search"
+			bind:this={input}
+			type="text"
 		role="searchbox"
 		autocomplete="off"
 		placeholder="Buscar por nombre o email"
@@ -53,7 +62,7 @@
 			type="button"
 			class="absolute top-1/2 right-1.5 -translate-y-1/2 rounded-md p-1 text-muted hover:text-ink"
 			aria-label="Limpiar búsqueda"
-			onclick={() => (text = '')}
+			onclick={clearSearch}
 		>
 			<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
 				<path d="M18 6 6 18" />

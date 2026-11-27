@@ -65,4 +65,17 @@ describe('SearchInput', () => {
 		expect(onSearch).not.toHaveBeenCalled();
 		expect((input as HTMLInputElement).value).toBe('');
 	});
+
+	it('moves the focus back to the input when the clear button removes itself', async () => {
+		vi.useFakeTimers();
+		render(SearchInput, { text: 'perez', onSearch: vi.fn() });
+		const input = screen.getByRole('searchbox');
+		const clearButton = screen.getByRole('button', { name: 'Limpiar búsqueda' });
+		clearButton.focus();
+
+		await fireEvent.click(clearButton);
+
+		expect(screen.queryByRole('button', { name: 'Limpiar búsqueda' })).toBeNull();
+		expect(document.activeElement).toBe(input);
+	});
 });
