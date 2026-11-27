@@ -35,6 +35,14 @@ class CustomerCreate(BaseModel):
         return value.strip().lower() if isinstance(value, str) else value
 
 
+class CustomerStatusUpdate(BaseModel):
+    """Body of `PATCH /customers/{customer_id}/status`. Unknown fields are ignored."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    status: CustomerStatus
+
+
 class CustomerOut(BaseModel):
     """A customer as returned by the API."""
 

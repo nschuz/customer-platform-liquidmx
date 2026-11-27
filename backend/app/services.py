@@ -1,8 +1,10 @@
 """Business rules. This module knows nothing about HTTP: it raises domain errors instead."""
 
+import uuid
+
 from sqlalchemy.exc import IntegrityError
 
-from app.core.exceptions import EmailAlreadyExists
+from app.core.exceptions import CustomerNotFound, EmailAlreadyExists
 from app.models import Customer
 from app.repositories import CustomerRepository
 from app.schemas import CustomerStatus
@@ -22,5 +24,19 @@ class CustomerService:
         except IntegrityError as exc:
             raise EmailAlreadyExists from exc
 
+    def get_customer(self, customer_id: uuid.UUID) -> Customer:
+        return self._find(customer_id)
+
     def list_customers(self, status: CustomerStatus | None = None) -> list[Customer]:
         return self.repository.list(status)
+
+    def update_status(self, customer_id: uuid.UUID, status: CustomerStatus) -> Customer:
+        customer = self._find(customer_id)
+        customer.status = status.value
+        return self.repository.save(customer)
+
+    def _find(self, customer_id: uuid.UUID) -> Customer:
+        customer = self.repository.get(customer_id)
+        if customer is None:
+            raise CustomerNotFound
+        return customer

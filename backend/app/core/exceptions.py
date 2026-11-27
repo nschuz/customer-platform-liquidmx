@@ -24,6 +24,12 @@ class EmailAlreadyExists(DomainError):
     message = "A customer with this email already exists."
 
 
+class CustomerNotFound(DomainError):
+    status_code = 404
+    code = "CUSTOMER_NOT_FOUND"
+    message = "Customer not found."
+
+
 def error_response(
     status_code: int, code: str, message: str, *, details: list[ErrorDetail] | None = None
 ) -> JSONResponse:
