@@ -9,7 +9,7 @@ vi.mock('$app/env/public', () => publicEnv);
 const customer: Customer = {
 	id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
 	name: 'Juan Pérez',
-	email: 'juan.perez@example.com',
+	email: 'juan.perez@liquidmx.com',
 	status: 'ACTIVE',
 	created_at: '2026-09-29T08:00:00.000Z'
 };
@@ -159,12 +159,12 @@ describe('customerApi', () => {
 			const created: Customer = { ...customer, id: '3f3fc070-e756-470b-87ce-5e22114e371e', status: 'PENDING' };
 			respondWith(created, 201);
 
-			const result = await createCustomer({ name: 'Lucía Díaz', email: 'lucia.diaz@example.com' });
+			const result = await createCustomer({ name: 'Lucía Díaz', email: 'lucia.diaz@liquidmx.com' });
 
 			expect(result).toEqual(created);
 			const [url, init] = fetchMock.mock.calls[0] ?? [];
 			expect(url).toBe('/api/customers');
-			expect(init).toMatchObject({ method: 'POST', body: JSON.stringify({ name: 'Lucía Díaz', email: 'lucia.diaz@example.com' }) });
+			expect(init).toMatchObject({ method: 'POST', body: JSON.stringify({ name: 'Lucía Díaz', email: 'lucia.diaz@liquidmx.com' }) });
 			expect(new Headers(init?.headers).get('content-type')).toBe('application/json');
 		});
 	});

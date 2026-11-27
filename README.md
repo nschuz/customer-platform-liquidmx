@@ -203,15 +203,15 @@ Crear un cliente. El estado inicial siempre es `PENDING`:
 ```sh
 curl -i -X POST http://localhost:8000/customers \
   -H 'Content-Type: application/json' \
-  -d '{"name": "Sofía Navarro", "email": "sofia.navarro@example.com"}'
+  -d '{"name": "Sofía Navarro", "email": "sofia.navarro@liquidmx.com"}'
 ```
 
 ```
 HTTP/1.1 201 Created
 content-type: application/json
-x-request-id: 0f085214f5a6459bba81dd025b15ec5c
+x-request-id: b06c70a808b1411281d95b9077f8eb4e
 
-{"id":"e56ec016-7746-4510-8295-d1af66714048","name":"Sofía Navarro","email":"sofia.navarro@example.com","status":"PENDING","created_at":"2026-11-27T20:54:40.569009Z"}
+{"id":"0fcdc55e-d082-4827-b7cf-afdd932fedd8","name":"Sofía Navarro","email":"sofia.navarro@liquidmx.com","status":"PENDING","created_at":"2026-11-27T22:54:18.538076Z"}
 ```
 
 Email duplicado, aunque cambien las mayúsculas:
@@ -219,8 +219,8 @@ Email duplicado, aunque cambien las mayúsculas:
 ```sh
 curl -w '\n%{http_code}\n' -X POST http://localhost:8000/customers \
   -H 'Content-Type: application/json' \
-  -d '{"name": "Otra Sofía", "email": "SOFIA.NAVARRO@example.com"}'
-{"error":{"code":"EMAIL_ALREADY_EXISTS","message":"A customer with this email already exists.","request_id":"9213566a5b1d48cbad7ed5f03272ee92"}}
+  -d '{"name": "Otra Sofía", "email": "SOFIA.NAVARRO@liquidmx.com"}'
+{"error":{"code":"EMAIL_ALREADY_EXISTS","message":"A customer with this email already exists.","request_id":"19b78e1d3ded490cb306de1df6b64101"}}
 409
 ```
 
@@ -230,14 +230,14 @@ Validación (email con formato inválido):
 curl -X POST http://localhost:8000/customers \
   -H 'Content-Type: application/json' \
   -d '{"name": "X", "email": "not-an-email"}'
-{"error":{"code":"VALIDATION_ERROR","message":"Invalid request.","request_id":"dd889ac34b4b4e0aaa8be823722cbb3e","details":[{"field":"email","message":"value is not a valid email address: An email address must have an @-sign."}]}}
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid request.","request_id":"1b835dbf4c4e4f6d944feee1944d32a0","details":[{"field":"email","message":"value is not a valid email address: An email address must have an @-sign."}]}}
 ```
 
 Listar con filtro (sin `?status=` devuelve todos):
 
 ```sh
 curl 'http://localhost:8000/customers?status=BLOCKED'
-[{"id":"966d1b18-e5ed-4e55-ac0d-84a9e2475440","name":"Carmen Ruiz","email":"carmen.ruiz@example.com","status":"BLOCKED","created_at":"2026-11-14T20:54:37.246901Z"},{"id":"78902d41-70b3-4ad4-ae69-5048cb2999c7","name":"Luis García","email":"luis.garcia@example.com","status":"BLOCKED","created_at":"2026-10-27T20:54:37.246901Z"}]
+[{"id":"127f7331-9bed-47c3-bd81-ed337c1514e2","name":"Carmen Ruiz","email":"carmen.ruiz@liquidmx.com","status":"BLOCKED","created_at":"2026-11-14T22:54:14.770873Z"},{"id":"92e61e99-c94c-42d2-a86f-ad34459340c6","name":"Luis García","email":"luis.garcia@liquidmx.com","status":"BLOCKED","created_at":"2026-10-27T22:54:14.770873Z"}]
 
 curl -o /dev/null -w '%{http_code}\n' 'http://localhost:8000/customers?status=NOPE'
 422
@@ -249,10 +249,10 @@ Consultar uno:
 ID=$(curl -s http://localhost:8000/customers \
   | python3 -c "import sys, json; print(next(c['id'] for c in json.load(sys.stdin) if c['name'] == 'Carlos López'))")
 curl http://localhost:8000/customers/$ID
-{"id":"36310aa0-bcc8-4668-8fcc-0969a389383a","name":"Carlos López","email":"carlos.lopez@example.com","status":"PENDING","created_at":"2026-10-15T20:54:37.246901Z"}
+{"id":"bae50582-ffd1-4b13-9371-052fbe20e9d6","name":"Carlos López","email":"carlos.lopez@liquidmx.com","status":"PENDING","created_at":"2026-10-15T22:54:14.770873Z"}
 
 curl -w '\n%{http_code}\n' http://localhost:8000/customers/00000000-0000-0000-0000-000000000000
-{"error":{"code":"CUSTOMER_NOT_FOUND","message":"Customer not found.","request_id":"1619697fe7c646fe8c4f7863a87737c9"}}
+{"error":{"code":"CUSTOMER_NOT_FOUND","message":"Customer not found.","request_id":"45301dc7e17d4d4a96438116f9cc7a0d"}}
 404
 ```
 
@@ -262,13 +262,13 @@ Cambiar el estado:
 curl -w '\n%{http_code}\n' -X PATCH http://localhost:8000/customers/$ID/status \
   -H 'Content-Type: application/json' \
   -d '{"status": "ACTIVE"}'
-{"id":"36310aa0-bcc8-4668-8fcc-0969a389383a","name":"Carlos López","email":"carlos.lopez@example.com","status":"ACTIVE","created_at":"2026-10-15T20:54:37.246901Z"}
+{"id":"bae50582-ffd1-4b13-9371-052fbe20e9d6","name":"Carlos López","email":"carlos.lopez@liquidmx.com","status":"ACTIVE","created_at":"2026-10-15T22:54:14.770873Z"}
 200
 
 curl -X PATCH http://localhost:8000/customers/$ID/status \
   -H 'Content-Type: application/json' \
   -d '{"status": "NOPE"}'
-{"error":{"code":"VALIDATION_ERROR","message":"Invalid request.","request_id":"7a87a7bd083a4f83a5363870b8368e4f","details":[{"field":"status","message":"Input should be 'ACTIVE', 'PENDING' or 'BLOCKED'"}]}}
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid request.","request_id":"4baecf9aeaae450092d0dd509f0c22c5","details":[{"field":"status","message":"Input should be 'ACTIVE', 'PENDING' or 'BLOCKED'"}]}}
 ```
 
 El id de petición se reutiliza si llega en la cabecera:

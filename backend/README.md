@@ -135,7 +135,7 @@ Crear un cliente. El nombre se recorta y el email se guarda en minúsculas:
 
 ```bash
 curl -s -i -X POST "$URL/customers" -H "Content-Type: application/json" \
-    -d '{"name": "  Sofía Ortega  ", "email": "Sofia.Ortega@Example.com"}'
+    -d '{"name": "  Sofía Ortega  ", "email": "Sofia.Ortega@LiquidMX.com"}'
 ```
 
 ```
@@ -147,14 +147,14 @@ content-type: application/json
 x-request-id: 4ef80476d8594081b972a97b71bfce31
 vary: Origin
 
-{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@example.com","status":"PENDING","created_at":"2026-11-27T18:52:44.841679Z"}
+{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@liquidmx.com","status":"PENDING","created_at":"2026-11-27T18:52:44.841679Z"}
 ```
 
 Email duplicado (`409`), aunque cambie la mayúscula:
 
 ```bash
 curl -s -i -X POST "$URL/customers" -H "Content-Type: application/json" \
-    -d '{"name": "Sofía Ortega", "email": "sofia.ortega@example.com"}'
+    -d '{"name": "Sofía Ortega", "email": "sofia.ortega@liquidmx.com"}'
 ```
 
 ```
@@ -188,7 +188,7 @@ curl -s "$URL/customers?status=BLOCKED"
 ```
 
 ```
-[{"id":"09d96930-0fd0-4d4e-bda1-89cae88b3bc2","name":"Carmen Ruiz","email":"carmen.ruiz@example.com","status":"BLOCKED","created_at":"2026-11-14T18:52:35.959373Z"},{"id":"ec0f6246-06f1-44c8-8863-c3017a7b1e9d","name":"Luis García","email":"luis.garcia@example.com","status":"BLOCKED","created_at":"2026-10-27T18:52:35.959373Z"}]
+[{"id":"09d96930-0fd0-4d4e-bda1-89cae88b3bc2","name":"Carmen Ruiz","email":"carmen.ruiz@liquidmx.com","status":"BLOCKED","created_at":"2026-11-14T18:52:35.959373Z"},{"id":"ec0f6246-06f1-44c8-8863-c3017a7b1e9d","name":"Luis García","email":"luis.garcia@liquidmx.com","status":"BLOCKED","created_at":"2026-10-27T18:52:35.959373Z"}]
 ```
 
 Estado inválido en el filtro (`422`):
@@ -210,7 +210,7 @@ curl -s "$URL/customers/$ID"
 ```
 
 ```
-{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@example.com","status":"PENDING","created_at":"2026-11-27T18:52:44.841679Z"}
+{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@liquidmx.com","status":"PENDING","created_at":"2026-11-27T18:52:44.841679Z"}
 ```
 
 Cliente inexistente (`404`):
@@ -243,7 +243,7 @@ curl -s -X PATCH "$URL/customers/$ID/status" -H "Content-Type: application/json"
 ```
 
 ```
-{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@example.com","status":"ACTIVE","created_at":"2026-11-27T18:52:44.841679Z"}
+{"id":"4e720f75-bb55-4db9-8743-704b9d6b34b4","name":"Sofía Ortega","email":"sofia.ortega@liquidmx.com","status":"ACTIVE","created_at":"2026-11-27T18:52:44.841679Z"}
 ```
 
 Método no soportado (`405`):
@@ -454,16 +454,16 @@ activa `render_as_batch`, que hace portables los `ALTER TABLE` a SQLite.
 
 | # | name | email | status |
 |---|---|---|---|
-| 1 | Juan Pérez | juan.perez@example.com | ACTIVE |
-| 2 | María Fernández | maria.fernandez@example.com | ACTIVE |
-| 3 | Carlos López | carlos.lopez@example.com | PENDING |
-| 4 | Ana Martínez | ana.martinez@example.com | ACTIVE |
-| 5 | Luis García | luis.garcia@example.com | BLOCKED |
-| 6 | Laura Sánchez | laura.sanchez@example.com | ACTIVE |
-| 7 | Pedro Gómez | pedro.gomez@example.com | PENDING |
-| 8 | Carmen Ruiz | carmen.ruiz@example.com | BLOCKED |
-| 9 | Javier Moreno | javier.moreno@example.com | ACTIVE |
-| 10 | Lucía Díaz | lucia.diaz@example.com | PENDING |
+| 1 | Juan Pérez | juan.perez@liquidmx.com | ACTIVE |
+| 2 | María Fernández | maria.fernandez@liquidmx.com | ACTIVE |
+| 3 | Carlos López | carlos.lopez@liquidmx.com | PENDING |
+| 4 | Ana Martínez | ana.martinez@liquidmx.com | ACTIVE |
+| 5 | Luis García | luis.garcia@liquidmx.com | BLOCKED |
+| 6 | Laura Sánchez | laura.sanchez@liquidmx.com | ACTIVE |
+| 7 | Pedro Gómez | pedro.gomez@liquidmx.com | PENDING |
+| 8 | Carmen Ruiz | carmen.ruiz@liquidmx.com | BLOCKED |
+| 9 | Javier Moreno | javier.moreno@liquidmx.com | ACTIVE |
+| 10 | Lucía Díaz | lucia.diaz@liquidmx.com | PENDING |
 
 Es idempotente por email: las filas que ya existen no se tocan y una segunda ejecución no crea
 nada. Para trabajar con la lista vacía, no lo ejecutes (o borra `customers.db` y vuelve a migrar).

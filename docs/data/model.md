@@ -36,7 +36,7 @@ Definición en el ORM: [`backend/app/models.py`](../../backend/app/models.py).
 - **El email es único en la base de datos**, no solo en el código: el `409` sale de capturar la
   `IntegrityError` que levanta la restricción `UNIQUE` al insertar. Una consulta previa
   "existe?" tendría una condición de carrera entre dos peticiones simultáneas. El email se
-  normaliza a minúsculas antes de guardarlo, así que `Juan@Example.com` y `juan@example.com`
+  normaliza a minúsculas antes de guardarlo, así que `Juan@LiquidMX.com` y `juan@liquidmx.com`
   chocan con el mismo `409`.
 - **`status` es texto, no un enum de base de datos.** Los valores permitidos se definen una vez
   (`CustomerStatus` en `schemas.py`) y la API los valida en el borde: es la única escritora de la

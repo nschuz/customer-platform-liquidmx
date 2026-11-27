@@ -15,7 +15,7 @@ def test_get_returns_the_customer(client: TestClient, engine: Engine) -> None:
     add_customer(
         engine,
         "Juan Pérez",
-        "juan.perez@example.com",
+        "juan.perez@liquidmx.com",
         status="ACTIVE",
         created_at=NOW - timedelta(days=1),
         customer_id=CUSTOMER_ID,
@@ -27,7 +27,7 @@ def test_get_returns_the_customer(client: TestClient, engine: Engine) -> None:
     assert response.json() == {
         "id": "8f14e45f-ceea-467f-a8e0-9b1f2c3d4e5f",
         "name": "Juan Pérez",
-        "email": "juan.perez@example.com",
+        "email": "juan.perez@liquidmx.com",
         "status": "ACTIVE",
         "created_at": "2026-11-26T12:00:00Z",
     }

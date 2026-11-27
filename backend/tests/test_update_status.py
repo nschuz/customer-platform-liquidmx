@@ -13,7 +13,7 @@ CUSTOMER_ID = uuid.UUID("8f14e45f-ceea-467f-a8e0-9b1f2c3d4e5f")
 CUSTOMER = {
     "id": "8f14e45f-ceea-467f-a8e0-9b1f2c3d4e5f",
     "name": "Carlos López",
-    "email": "carlos.lopez@example.com",
+    "email": "carlos.lopez@liquidmx.com",
     "created_at": "2026-11-26T12:00:00Z",
 }
 
