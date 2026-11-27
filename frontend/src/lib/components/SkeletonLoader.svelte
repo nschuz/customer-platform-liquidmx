@@ -12,7 +12,7 @@
 		aria-hidden="true"
 	>
 		<div
-			class="grid grid-cols-[19fr_28fr_16fr_23fr_14fr] items-center gap-4 border-b border-line px-2 py-3.5 lg:px-4"
+			class="grid grid-cols-[18fr_28fr_15fr_23fr_16fr] items-center gap-4 border-b border-line px-1.5 py-3.5 lg:px-4"
 		>
 			<span class="{bar} h-3"></span>
 			<span class="{bar} h-3"></span>
@@ -22,7 +22,7 @@
 		</div>
 		{#each { length: ROWS } as _}
 			<div
-				class="grid grid-cols-[19fr_28fr_16fr_23fr_14fr] items-center gap-4 border-b border-line px-2 py-3.5 last:border-b-0 lg:px-4"
+				class="grid grid-cols-[18fr_28fr_15fr_23fr_16fr] items-center gap-4 border-b border-line px-1.5 py-3.5 last:border-b-0 lg:px-4"
 			>
 				<span class="{bar} h-4 w-5/6"></span>
 				<span class="{bar} h-4"></span>

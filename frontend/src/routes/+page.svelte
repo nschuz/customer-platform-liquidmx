@@ -85,11 +85,11 @@
 
 		{#if !store.loading && !store.error}
 			<section
-				class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+				class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
 				aria-label="Filtros y búsqueda"
 			>
 				<CustomerFilters active={activeStatus} counts={statusCounts} onChange={setStatusFilter} />
-				<div class="w-full shrink-0 md:w-80">
+				<div class="w-full shrink-0 lg:w-80">
 					<SearchInput bind:text={searchText} onSearch={setQuery} />
 				</div>
 			</section>
