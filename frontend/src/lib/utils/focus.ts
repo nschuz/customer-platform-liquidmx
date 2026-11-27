@@ -2,11 +2,16 @@
 const FOCUSABLE =
 	'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
 
+/** The controls inside a container that can take the focus, in document order. */
+export function focusableControls(container: ParentNode): HTMLElement[] {
+	return [...container.querySelectorAll<HTMLElement>(FOCUSABLE)];
+}
+
 /** Handles Tab and Shift+Tab on behalf of a container, so that the focus wraps around inside it
  * instead of leaving it. Any other key is left to the browser. */
 export function trapTabKey(event: KeyboardEvent & { currentTarget: HTMLElement }): void {
 	if (event.key !== 'Tab') return;
-	const focusable = [...event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE)];
+	const focusable = focusableControls(event.currentTarget);
 	const first = focusable[0];
 	const last = focusable[focusable.length - 1];
 	if (!first || !last) return;

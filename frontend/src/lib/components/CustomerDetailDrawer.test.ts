@@ -331,14 +331,20 @@ describe('status change of the drawer', () => {
 // key: a trapped Tab is `preventDefault`-ed, and then the drawer itself moves the focus.
 describe('focus trap of the drawer', () => {
 	/** Presses a key the browser could act on and tells whether the drawer claimed it. */
-	async function press(element: Element, init: KeyboardEventInit): Promise<boolean> {
+	async function press(target: Element | Window, init: KeyboardEventInit): Promise<boolean> {
 		const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
-		await fireEvent(element, event);
+		await fireEvent(target, event);
 		return event.defaultPrevented;
 	}
 
 	const closeButton = () => screen.getByRole<HTMLButtonElement>('button', { name: 'Cerrar detalle' });
 	const lastOption = () => option('Bloqueado');
+
+	/** Leaves the focus on <body>: where the browser puts it when a focused control is disabled. */
+	function loseFocus() {
+		closeButton().blur();
+		expect(document.activeElement).toBe(document.body);
+	}
 
 	it('claims Tab on the last control and wraps to the first', async () => {
 		renderDrawer();
@@ -404,5 +410,47 @@ describe('focus trap of the drawer', () => {
 		expect(await press(dialog, { key: 'Tab' })).toBe(true);
 		expect(document.activeElement).toBe(closeButton());
 		change.resolve();
+	});
+
+	// With the focus on <body> a key press reaches the window, not the drawer: left alone, a Tab
+	// there moves the focus out of the page.
+	it('takes a Tab from <body> back into the drawer while a change is pending, in both directions', async () => {
+		const change = pendingChange();
+		renderDrawer(vi.fn(), change.onStatusChange);
+		await fireEvent.click(option('Activo'));
+		loseFocus();
+
+		expect(await press(window, { key: 'Tab' })).toBe(true);
+		expect(document.activeElement).toBe(closeButton());
+
+		loseFocus();
+
+		expect(await press(window, { key: 'Tab', shiftKey: true })).toBe(true);
+		expect(document.activeElement).toBe(closeButton());
+		change.resolve();
+	});
+
+	it('takes a Tab from <body> to the first control, and Shift+Tab to the last one', async () => {
+		renderDrawer();
+		loseFocus();
+
+		expect(await press(window, { key: 'Tab' })).toBe(true);
+		expect(document.activeElement).toBe(closeButton());
+
+		loseFocus();
+
+		expect(await press(window, { key: 'Tab', shiftKey: true })).toBe(true);
+		expect(document.activeElement).toBe(lastOption());
+	});
+
+	// Only the edges and <body> are claimed: anywhere else the browser moves the focus itself.
+	it('leaves a Tab pressed on a control in the middle to the browser, in both directions', async () => {
+		renderDrawer();
+		const middle = option('Pendiente');
+		middle.focus();
+
+		expect(await press(middle, { key: 'Tab' })).toBe(false);
+		expect(await press(middle, { key: 'Tab', shiftKey: true })).toBe(false);
+		expect(document.activeElement).toBe(middle);
 	});
 });

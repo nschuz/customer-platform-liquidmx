@@ -4,7 +4,7 @@
 		type Customer,
 		type CustomerStatus
 	} from '#lib/types/customer.ts';
-	import { trapTabKey } from '#lib/utils/focus.ts';
+	import { focusableControls, trapTabKey } from '#lib/utils/focus.ts';
 	import { formatDateTime } from '#lib/utils/formatters.ts';
 	import { describeApiError } from '#lib/utils/messages.ts';
 	import CustomerStatusControl from './CustomerStatusControl.svelte';
@@ -39,6 +39,7 @@
 	}
 
 	let closeButton = $state<HTMLButtonElement>();
+	let panel = $state<HTMLDivElement>();
 
 	// On open: take the focus and lock the scroll of the page. On close: give the scroll back.
 	// The focus itself is returned by the page, once the rest of it is no longer inert.
@@ -51,8 +52,16 @@
 		};
 	});
 
+	// A Tab that reaches the window means that nothing in the drawer has the focus: while a change
+	// is being saved the browser drops it to <body>, because the option that became disabled is
+	// blurred. Left alone, that Tab would leave the page, so it is taken back into the drawer.
 	function handleWindowKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') onClose();
+		if (event.key === 'Tab' && document.activeElement === document.body) {
+			event.preventDefault();
+			const controls = panel ? focusableControls(panel) : [];
+			(event.shiftKey ? controls[controls.length - 1] : controls[0])?.focus();
+		}
 	}
 </script>
 
@@ -65,6 +74,7 @@
 		aria-modal="true"
 		aria-labelledby="customer-detail-title"
 		tabindex="-1"
+		bind:this={panel}
 		class="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-surface shadow-xl motion-safe:animate-slide-in"
 		onkeydown={trapTabKey}
 	>
