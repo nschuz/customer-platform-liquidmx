@@ -1,7 +1,7 @@
 # Customer Platform
 
-API para administrar clientes de una plataforma financiera y el dashboard que la consume. Resuelve
-dos retos técnicos en un solo repositorio: el backend en **Python / FastAPI** y el frontend en
+API para administrar clientes de una plataforma financiera y el dashboard que la consume. Un solo
+repositorio con dos partes: el backend en **Python / FastAPI** y el frontend en
 **SvelteKit / TypeScript**. Cada mitad funciona por sí sola y, usadas juntas, forman el flujo
 completo.
 
