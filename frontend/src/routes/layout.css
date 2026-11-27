@@ -14,3 +14,11 @@
 	--color-status-pending: var(--color-amber-800);
 	--color-status-blocked: var(--color-red-700);
 }
+
+/* One visible focus ring for every control, instead of repeating it on each element. */
+@layer base {
+	:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+}
