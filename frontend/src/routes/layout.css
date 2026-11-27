@@ -2,9 +2,10 @@
 
 /* The small palette of the dashboard: light theme only. */
 @theme {
-	--color-page: var(--color-gray-50); /* app background */
+	--color-page: var(--color-gray-50); /* lightest fill: hovered rows, pill counts */
 	--color-surface: #ffffff; /* cards, table, drawer */
-	--color-line: var(--color-gray-200); /* borders */
+	--color-line: var(--color-gray-200); /* borders that only separate */
+	--color-line-strong: var(--color-gray-500); /* boundaries that identify a control, 4.8:1 on white */
 	--color-ink: var(--color-gray-900); /* primary text */
 	--color-muted: var(--color-gray-500); /* secondary text, 4.6:1 on page */
 	--color-accent: var(--color-indigo-600); /* primary actions and focus rings */

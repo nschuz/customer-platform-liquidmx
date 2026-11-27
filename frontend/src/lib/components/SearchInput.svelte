@@ -54,7 +54,7 @@
 		role="searchbox"
 		autocomplete="off"
 		placeholder="Buscar por nombre o email"
-		class="w-full rounded-lg border border-line bg-surface py-1.5 pr-9 pl-9 text-sm text-ink placeholder:text-muted"
+		class="w-full rounded-lg border border-line-strong bg-surface py-1.5 pr-9 pl-9 text-sm text-ink placeholder:text-muted"
 		bind:value={text}
 	/>
 	{#if text !== ''}
