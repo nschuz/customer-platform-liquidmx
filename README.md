@@ -40,6 +40,9 @@ docker compose down       # detiene y borra los contenedores; conserva la base d
 docker compose down -v    # lo mismo y además borra la base de datos
 ```
 
+Para empezar con la lista vacía hace falta un volumen nuevo: `SEED_ON_STARTUP=false` solo da una
+lista vacía después de `docker compose down -v`.
+
 Si en tu máquina los puertos 3000 o 8000 están ocupados, copia `.env.example` como `.env` y ajusta
 `FRONTEND_PORT` y `BACKEND_PORT` (y con ellos `PUBLIC_API_URL` y `CORS_ORIGINS`). `.env.example`
 explica cada variable.
@@ -78,13 +81,15 @@ puerto que no sea el 5173, arranca el backend con `CORS_ORIGINS=http://localhost
 | `make logs`         | Sigue los logs de los dos servicios                             |
 | `make ps`           | Estado de los servicios                                         |
 | `make install`      | Instala las dependencias de ambos (`uv sync --frozen`, `npm ci`) |
-| `make dev-backend`  | Servidor de desarrollo del backend con recarga                  |
+| `make dev-backend`  | Servidor de desarrollo del backend con recarga. La primera vez, después de `make install` y `make migrate` (y de `make seed` para tener datos) |
 | `make dev-frontend` | Servidor de desarrollo del frontend                             |
 | `make migrate`      | Aplica las migraciones a la base de datos local de `backend/`   |
 | `make seed`         | Crea los clientes de demostración en la base de datos local     |
 | `make test`         | Ejecuta las dos suites de tests                                 |
 | `make lint`         | ruff (lint y formato), mypy y svelte-check                      |
 | `make check`        | Todo lo que ejecuta el CI: lint, tests y build de producción    |
+
+`make up` necesita un shell POSIX (`sh`, `sed`): en Windows, ejecútalo desde Git Bash o WSL.
 
 ## Arquitectura
 
@@ -286,7 +291,7 @@ Pantalla **Customer Dashboard**:
 - Tabla a partir de 768 px y tarjetas por debajo, sin scroll horizontal.
 - Filtro por estado con contadores (Todos, Activos, Pendientes, Bloqueados) y búsqueda por nombre o
   email en tiempo real, sin distinguir mayúsculas ni acentos.
-- `<StatusBadge status={customer.status} />`: texto y color, con contraste suficiente.
+- Un componente reutilizable `StatusBadge` con texto y color, y contraste suficiente.
 - Estados de carga (esqueletos), de error (banner con **Reintentar**) y de lista vacía, con dos
   variantes: aún no hay clientes, y la búsqueda o el filtro no arrojan resultados.
 - Botón **Ver detalle**: panel lateral accesible (cierre con `Esc`, clic fuera o botón; foco
@@ -316,7 +321,7 @@ Ejecuta lo mismo que el CI:
 | ----------------- | -------------------------------- | ----------------------------------- |
 | Lint y formato    | `ruff check`, `ruff format --check` | —                                 |
 | Tipos             | `mypy` (estricto, sobre `app`, `scripts`, `alembic` y `tests`) | `svelte-check` (0 errores, 0 avisos) |
-| Tests             | `pytest`: 102 tests               | `vitest`: 165 tests en 19 archivos  |
+| Tests             | `pytest`: 102 tests               | `vitest`: 177 tests en 19 archivos  |
 | Build             | —                                | `vite build`                        |
 
 Los tests del backend usan una base de datos aislada por test y cubren cada endpoint con sus casos
@@ -331,9 +336,9 @@ componentes. El workflow `.github/workflows/ci.yml` corre todo esto en cada push
   HTTP y depende de una interfaz, así que se prueba con fakes y se puede cambiar de ORM. Para una
   entidad no merecía use-cases ni entidades de dominio separadas: el costo de más capas sería
   leer tres archivos para seguir un flujo.
-- **SQLite con Alembic, portable a PostgreSQL.** SQLite basta para el reto y no exige servicio;
-  los tipos son portables y la migración usa `render_as_batch`. `DATABASE_URL` permite cambiar de
-  motor sin tocar código. PostgreSQL **no se probó** (ver "Qué se verificó").
+- **SQLite con Alembic, portable a PostgreSQL.** SQLite basta para esta aplicación y no exige
+  servicio; los tipos son portables y la migración usa `render_as_batch`. `DATABASE_URL` permite
+  cambiar de motor sin tocar código. PostgreSQL **no se probó** (ver "Qué se verificó").
 - **El email duplicado lo decide la base de datos.** Hay una restricción `UNIQUE` y el `409` sale
   de capturar la `IntegrityError`: una consulta previa tendría una condición de carrera.
 - **Un formato de error y un request id.** Un solo constructor de errores para todos los casos,
@@ -355,8 +360,9 @@ componentes. El workflow `.github/workflows/ci.yml` corre todo esto en cada push
   se muestran en una zona fija para que la lista no cambie según el navegador.
 - **Cambio de estado no optimista.** La interfaz cambia con la respuesta del servidor: con un
   cliente en juego, esperar cuesta una petición y evita deshacer la interfaz si algo falla. Los
-  errores se describen en español según el `code`, porque los mensajes del servidor están en
-  inglés.
+  errores se describen en español, porque los mensajes del servidor están en inglés: el cambio de
+  estado va según su `code`, y el banner de carga abre con un mensaje propio que lleva detrás el
+  texto del servidor cuando lo hay.
 - **Versiones.** El backend usa las estables al momento de crearlo (FastAPI 0.165, SQLAlchemy 2.1,
   Pydantic 2.14, mypy 2.4). El scaffolding oficial de SvelteKit instaló SvelteKit 3 y Svelte 5.59,
   cuyas convenciones difieren de SvelteKit 2 (configuración en `vite.config.ts`, imports `#lib`,
@@ -389,7 +395,8 @@ git log --graph --oneline --all
 ```
 
 Los mensajes siguen Conventional Commits (`feat`, `fix`, `test`, `docs`, `build`, `ci`, `refactor`,
-`chore`), con commits pequeños y cada uno deja el proyecto en estado ejecutable.
+`chore`), con commits pequeños; en la rama del backend se comprobó además que cada commit pasa su
+suite.
 
 ## Variables de entorno
 
@@ -397,7 +404,7 @@ Ninguna es un secreto y todas tienen un valor por defecto. Cada archivo document
 
 | Archivo                 | Variables                                                              |
 | ----------------------- | ---------------------------------------------------------------------- |
-| [`.env.example`](.env.example)                 | `BACKEND_PORT`, `FRONTEND_PORT`, `PUBLIC_API_URL`, `CORS_ORIGINS`, `SEED_ON_STARTUP` (Compose) |
+| [`.env.example`](.env.example)                 | `BACKEND_PORT`, `FRONTEND_PORT`, `PUBLIC_API_URL`, `MOCK_EMPTY`, `CORS_ORIGINS`, `SEED_ON_STARTUP` (Compose) |
 | [`backend/.env.example`](backend/.env.example) | `DATABASE_URL`, `CORS_ORIGINS`                                         |
 | [`frontend/.env.example`](frontend/.env.example) | `PUBLIC_API_URL`, `MOCK_EMPTY`                                         |
 
@@ -405,7 +412,7 @@ Ninguna es un secreto y todas tienen un valor por defecto. Cada archivo document
 
 Verificado sobre el commit de este release:
 
-- `make check` en verde: ruff, formato, mypy, svelte-check, 102 tests de backend, 165 de frontend y
+- `make check` en verde: ruff, formato, mypy, svelte-check, 102 tests de backend, 177 de frontend y
   build de producción.
 - `docker compose up --build` desde cero: los dos servicios llegan a `healthy`, ambos contenedores
   corren con un usuario distinto de root, la base de datos persiste entre reinicios, y un volumen
