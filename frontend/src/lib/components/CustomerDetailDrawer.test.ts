@@ -67,18 +67,6 @@ describe('CustomerDetailDrawer', () => {
 		expect(onClose).toHaveBeenCalledOnce();
 	});
 
-	it('keeps the focus inside when tabbing', async () => {
-		renderDrawer();
-		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
-
-		closeButton.focus();
-		await fireEvent.keyDown(closeButton, { key: 'Tab' });
-		expect(document.activeElement).toBe(closeButton);
-
-		await fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
-		expect(document.activeElement).toBe(closeButton);
-	});
-
 	it('locks the scroll of the page while it is open', () => {
 		document.body.style.overflow = 'auto';
 		const { unmount } = renderDrawer();
@@ -88,5 +76,58 @@ describe('CustomerDetailDrawer', () => {
 		unmount();
 
 		expect(document.body.style.overflow).toBe('auto');
+	});
+});
+
+// jsdom never moves the focus on Tab, so what is checked here is whether the drawer claims the
+// key: a trapped Tab is `preventDefault`-ed, and then the drawer itself moves the focus.
+describe('focus trap of the drawer', () => {
+	/** Presses a key the browser could act on and tells whether the drawer claimed it. */
+	async function press(element: Element, init: KeyboardEventInit): Promise<boolean> {
+		const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
+		await fireEvent(element, event);
+		return event.defaultPrevented;
+	}
+
+	/** The drawer has one control today; this stands in for the controls a later task adds. */
+	function addExtraControl(dialog: HTMLElement): HTMLButtonElement {
+		const extra = document.createElement('button');
+		extra.textContent = 'Extra';
+		dialog.append(extra);
+		return extra;
+	}
+
+	it('claims Tab on the last control and wraps to the first', async () => {
+		renderDrawer();
+		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
+		const extra = addExtraControl(screen.getByRole('dialog'));
+
+		extra.focus();
+
+		expect(await press(extra, { key: 'Tab' })).toBe(true);
+		expect(document.activeElement).toBe(closeButton);
+	});
+
+	it('claims Shift+Tab on the first control and wraps to the last', async () => {
+		renderDrawer();
+		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
+		const extra = addExtraControl(screen.getByRole('dialog'));
+
+		closeButton.focus();
+
+		expect(await press(closeButton, { key: 'Tab', shiftKey: true })).toBe(true);
+		expect(document.activeElement).toBe(extra);
+	});
+
+	it('claims Tab in both directions when it is the only control', async () => {
+		renderDrawer();
+		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
+		closeButton.focus();
+
+		expect(await press(closeButton, { key: 'Tab' })).toBe(true);
+		expect(document.activeElement).toBe(closeButton);
+
+		expect(await press(closeButton, { key: 'Tab', shiftKey: true })).toBe(true);
+		expect(document.activeElement).toBe(closeButton);
 	});
 });
