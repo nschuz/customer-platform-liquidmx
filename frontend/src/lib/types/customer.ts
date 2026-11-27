@@ -2,6 +2,9 @@ export const CUSTOMER_STATUSES = ['ACTIVE', 'PENDING', 'BLOCKED'] as const;
 
 export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 
+/** The status pills of the dashboard: one of the statuses, or `ALL` for no filter. */
+export type StatusFilter = CustomerStatus | 'ALL';
+
 /** A customer as the API returns it. The snake_case keys are part of the contract. */
 export interface Customer {
 	id: string;
