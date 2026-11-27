@@ -56,7 +56,7 @@ known-third-party = ["alembic"]
 
 [tool.mypy]
 python_version = "3.12"
-files = ["app", "alembic", "tests"]
+files = ["app", "scripts", "alembic", "tests"]
 plugins = ["pydantic.mypy"]
 disallow_untyped_defs = true
 check_untyped_defs = true
