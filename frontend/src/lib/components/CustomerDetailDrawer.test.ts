@@ -119,6 +119,24 @@ describe('focus trap of the drawer', () => {
 		expect(document.activeElement).toBe(extra);
 	});
 
+	it('claims Tab in both directions when the panel itself has the focus', async () => {
+		renderDrawer();
+		const dialog = screen.getByRole('dialog');
+		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });
+		const extra = addExtraControl(dialog);
+
+		// A click on the content of the drawer leaves the focus on the panel itself (tabindex -1).
+		dialog.focus();
+
+		expect(await press(dialog, { key: 'Tab', shiftKey: true })).toBe(true);
+		expect(document.activeElement).toBe(extra);
+
+		dialog.focus();
+
+		expect(await press(dialog, { key: 'Tab' })).toBe(true);
+		expect(document.activeElement).toBe(closeButton);
+	});
+
 	it('claims Tab in both directions when it is the only control', async () => {
 		renderDrawer();
 		const closeButton = screen.getByRole('button', { name: 'Cerrar detalle' });

@@ -32,9 +32,11 @@
 		const last = focusable[focusable.length - 1];
 		if (!first || !last) return;
 
-		const leaves = event.shiftKey
-			? document.activeElement === first
-			: document.activeElement === last;
+		// The panel itself (tabindex -1) holds the focus after a click on its content; leaving it
+		// would be leaving the drawer too.
+		const active = document.activeElement;
+		const leaves =
+			active === event.currentTarget || (event.shiftKey ? active === first : active === last);
 		if (leaves) {
 			event.preventDefault();
 			(event.shiftKey ? last : first).focus();
