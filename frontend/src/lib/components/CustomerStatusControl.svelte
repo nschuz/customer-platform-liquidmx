@@ -18,7 +18,7 @@
 	}
 
 	/** The button of each status, to be able to give the focus back to one of them. */
-	const optionButtons: Partial<Record<CustomerStatus, HTMLButtonElement>> = {};
+	const optionButtons: Partial<Record<CustomerStatus, HTMLButtonElement>> = $state({});
 
 	// A button that becomes disabled is blurred and the focus falls to <body>. Once the options are
 	// enabled again it goes back to the one that was saved, unless the user moved it meanwhile.
