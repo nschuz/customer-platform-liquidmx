@@ -5,13 +5,13 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-import app.models  # noqa: F401  (registers the tables on the metadata)
-from app import db
+from app import db, models  # noqa: F401  (importing the models registers the tables)
 from app.core.config import Settings
 from app.db import Base, create_db_engine, get_session
 from app.main import create_app
@@ -60,9 +60,9 @@ def engine() -> Generator[Engine]:
 
 
 @pytest.fixture
-def client(engine: Engine) -> Generator[TestClient]:
-    """HTTP client on the test database, with default settings. Every request gets its own
-    session, as in production, so a test can only observe what was really committed."""
+def app(engine: Engine) -> FastAPI:
+    """The application, with default settings, wired to the test database. Every request gets
+    its own session, as in production, so a test can only observe what was really committed."""
 
     def test_session() -> Generator[Session]:
         with Session(engine) as session:
@@ -70,5 +70,11 @@ def client(engine: Engine) -> Generator[TestClient]:
 
     app = create_app(Settings(_env_file=None))
     app.dependency_overrides[get_session] = test_session
-    # Not used as a context manager: the lifespan (logging setup) has its own tests.
+    return app
+
+
+@pytest.fixture
+def client(app: FastAPI) -> Generator[TestClient]:
+    """HTTP client for `app`. Not used as a context manager: the lifespan (logging setup) has
+    its own tests."""
     yield TestClient(app)

@@ -70,6 +70,7 @@ def test_create_rejects_an_email_that_already_exists(client: TestClient, second_
         "error": {
             "code": "EMAIL_ALREADY_EXISTS",
             "message": "A customer with this email already exists.",
+            "request_id": response.headers["X-Request-ID"],
         }
     }
 

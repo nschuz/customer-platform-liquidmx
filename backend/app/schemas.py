@@ -75,6 +75,7 @@ class ErrorBody(BaseModel):
 
     code: str
     message: str
+    request_id: str
     details: list[ErrorDetail] | None = None
 
 

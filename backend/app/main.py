@@ -26,14 +26,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     app = FastAPI(title="Customer Management API", version="1.0.0", lifespan=lifespan)
     register_exception_handlers(app)
+    # Added first, so it runs inside the CORS middleware: the generic 500 it writes for errors
+    # nobody handled then carries the CORS headers a browser needs to read it.
+    app.add_middleware(RequestIdMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["Content-Type"],
     )
-    # Added last, so it runs first: every response, CORS ones included, gets a request id.
-    app.add_middleware(RequestIdMiddleware)
     app.include_router(customers.router)
     app.include_router(health.router)
     return app

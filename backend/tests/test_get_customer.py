@@ -38,7 +38,11 @@ def test_get_returns_404_for_an_unknown_customer(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json() == {
-        "error": {"code": "CUSTOMER_NOT_FOUND", "message": "Customer not found."}
+        "error": {
+            "code": "CUSTOMER_NOT_FOUND",
+            "message": "Customer not found.",
+            "request_id": response.headers["X-Request-ID"],
+        }
     }
 
 

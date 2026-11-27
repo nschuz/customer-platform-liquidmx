@@ -8,10 +8,12 @@ from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from app.core.exceptions import internal_error_response
 from app.core.logging import ACCESS_LOGGER
 
 REQUEST_ID_HEADER = "x-request-id"
 logger = logging.getLogger(ACCESS_LOGGER)
+error_logger = logging.getLogger("app")
 
 
 class RequestIdMiddleware:
@@ -32,16 +34,26 @@ class RequestIdMiddleware:
         request.state.request_id = request_id
         started = time.perf_counter()
         status_code = 500  # what a request ends up as when the application dies before answering
+        response_started = False
 
         async def send_with_request_id(message: Message) -> None:
-            nonlocal status_code
+            nonlocal status_code, response_started
             if message["type"] == "http.response.start":
                 status_code = message["status"]
+                response_started = True
                 MutableHeaders(scope=message).append(REQUEST_ID_HEADER, request_id)
             await send(message)
 
         try:
             await self.app(scope, receive, send_with_request_id)
+        except Exception:
+            # Starlette answers errors that nobody handled from its outermost middleware, which
+            # wraps every other one: that response would carry neither the request id nor the
+            # CORS headers a browser needs to read it. So the answer is written here instead.
+            if response_started:
+                raise
+            error_logger.exception("Unhandled exception")
+            await internal_error_response(request)(scope, receive, send_with_request_id)
         finally:
             # Method and path only: names and emails travel in bodies, never in logs.
             logger.info(
