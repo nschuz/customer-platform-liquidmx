@@ -4,6 +4,7 @@ import {
 	type CreateCustomerInput,
 	type Customer,
 	type CustomerStatus,
+	type UpdateCustomerStatusInput,
 	type ValidationErrorDetail
 } from '#lib/types/customer.ts';
 import { asRecord } from '#lib/utils/guards.ts';
@@ -57,7 +58,8 @@ export function createCustomer(input: CreateCustomerInput): Promise<Customer> {
 }
 
 export function updateCustomerStatus(id: string, status: CustomerStatus): Promise<Customer> {
-	const init = { method: 'PATCH', body: JSON.stringify({ status }) };
+	const body = { status } satisfies UpdateCustomerStatusInput;
+	const init = { method: 'PATCH', body: JSON.stringify(body) };
 	return request(`${customerPath(id)}/status`, init, isCustomer);
 }
 
