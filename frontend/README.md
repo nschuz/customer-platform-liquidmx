@@ -1,8 +1,8 @@
 # Customer Dashboard (frontend)
 
 Dashboard de clientes hecho con SvelteKit, Svelte 5 y Tailwind CSS 4. Lista los clientes de la
-plataforma, permite filtrarlos por estado, buscarlos por nombre o email y consultar el detalle de
-cada uno en un panel lateral.
+plataforma, permite filtrarlos por estado, buscarlos por nombre o email, consultar el detalle de
+cada uno en un panel lateral y cambiar su estado desde ahí.
 
 Funciona por sí solo: sin configurar nada, usa una **API simulada** incluida en este proyecto. Es
 la mitad de frontend de `customer-platform`; el backend (FastAPI) vive en `../backend`.
@@ -86,6 +86,8 @@ src/
     utils/search.ts             # Búsqueda: normalización, filtro y contadores
     utils/formatters.ts         # formatDateTime
     utils/guards.ts             # asRecord: lee JSON sin tipos
+    utils/messages.ts           # describeApiError: el error en español, según su código
+    utils/focus.ts              # Trampa de Tab y foco al primer botón visible
     components/                 # Un componente por pieza de la interfaz
     server/                     # Solo servidor: datos y reglas de la API simulada
 ```
@@ -101,15 +103,34 @@ Las pruebas viven junto al código que cubren (`*.test.ts`).
 | Sin clientes          | Arranca con `MOCK_EMPTY=true`.                                              |
 | Sin resultados        | Escribe en el buscador algo que no coincida o combina filtro y búsqueda.    |
 | Detalle               | Pulsa "Ver detalle" en una fila o en una tarjeta.                           |
+| Cambio de estado      | Abre un cliente y elige otro estado en "Cambiar estado".                      |
 
 A 375 px de ancho se ven tarjetas; a 768 px o más, la tabla.
+
+## Cambiar el estado desde el detalle
+
+El drawer incluye la sección **Cambiar estado**: tres botones (Activo, Pendiente, Bloqueado) con
+`aria-pressed`. El estado actual queda marcado y no envía nada si se pulsa. Elegir otro envía
+`PATCH /customers/{customer_id}/status` y, mientras espera, las tres opciones se deshabilitan y la
+elegida muestra "Guardando…".
+
+- **No es optimista.** La fila, los contadores y el drawer cambian solo cuando el servidor responde,
+  con el cuerpo de esa respuesta. Si el cambio hace que el cliente deje de coincidir con el filtro
+  activo, su fila sale de la lista y el drawer se queda abierto con los datos actualizados.
+- **Feedback accesible.** Una región `aria-live="polite"` anuncia "Estado actualizado a …". Si
+  falla, un `role="alert"` explica el error en español a partir del `code` del envelope: el mensaje
+  del servidor real está en inglés y no se muestra tal cual. La lista no se toca.
+- **Teclado.** Las opciones se alcanzan con Tab desde el botón de cerrar. El foco no sale del
+  drawer ni siquiera cuando el botón pulsado se deshabilita, y al cerrar vuelve al botón de "Ver
+  detalle" que lo abrió o, si esa fila ya no está, a la primera de la lista.
 
 ## Pruebas
 
 `npm test` ejecuta Vitest con jsdom y Testing Library. Cubren la lógica pura (búsqueda, fechas,
 guardas), el cliente HTTP (contratos, errores de red y timeout de 10 s), las rutas simuladas
 (200, 201, 404, 409 y 422 con su envelope), el store y el comportamiento de los componentes
-(etiquetas del badge, pills con `aria-pressed`, debounce de la búsqueda, cierre y foco del drawer).
+(etiquetas del badge, pills con `aria-pressed`, debounce de la búsqueda, cierre y foco del drawer,
+cambio de estado con su estado pendiente y sus errores, trampa de Tab).
 
 La configuración de Vitest está en `vitest.config.ts`, separada de la de Vite: allí Svelte se
 resuelve con la condición `browser`, que no debe llegar al build de la app.
@@ -141,6 +162,10 @@ resuelve con la condición `browser`, que no debe llegar al build de la app.
 - **Accesibilidad del drawer.** `role="dialog"`, `aria-modal`, fondo `inert`, foco atrapado con
   Tab y devuelto al botón que abrió el panel. La página guarda ese botón antes de volverse
   `inert`, porque el navegador quita el foco a lo que queda dentro de un subárbol inert.
+- **Cambio de estado no optimista y errores por código.** Con un solo cliente en juego, esperar la
+  respuesta cuesta una petición y evita tener que deshacer la interfaz si el servidor rechaza el
+  cambio. Los errores se describen en el cliente a partir del `code` del envelope
+  (`describeApiError`), porque el backend real responde en inglés y la API simulada en español.
 
 ## Versiones y convenciones
 
