@@ -1,0 +1,53 @@
+# Local stack of the customer platform: the FastAPI backend and the SvelteKit frontend.
+# Compose v2 file (no `version` key). Every value can be overridden from the environment or from
+# a `.env` file next to this file; `.env.example` documents them. None of them is a secret.
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      # Absolute path (four slashes): the SQLite file lives in the named volume mounted at /data.
+      DATABASE_URL: sqlite:////data/customers.db
+      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173}"
+      SEED_ON_STARTUP: "${SEED_ON_STARTUP:-true}"
+    volumes:
+      - backend_data:/data
+    healthcheck:
+      # The slim image has no curl: Python's standard library is enough. Each poll is a request and
+      # so a line in the access log, which is why the interval is 30 s and not a few.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      # The URL the BROWSER uses to call the backend, so `localhost` and never `backend`.
+      # Read by the frontend server when it starts, not when the image is built: changing it
+      # only takes `docker compose up -d frontend`. An empty value selects the simulated API.
+      PUBLIC_API_URL: "${PUBLIC_API_URL-http://localhost:8000}"
+      # Whether the simulated API starts with no customers. It only matters when PUBLIC_API_URL is
+      # empty; the default keeps the ten demo customers.
+      MOCK_EMPTY: "${MOCK_EMPTY:-false}"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  backend_data:
