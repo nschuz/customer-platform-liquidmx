@@ -11,8 +11,9 @@ from app.schemas import CustomerStatus
 
 
 class CustomerService:
-    """The use cases. It knows no HTTP and talks to storage only through `CustomerRepository`;
-    the one storage detail it is aware of is the error the database raises for a duplicate."""
+    """The use cases. It knows no HTTP and reaches storage only through `CustomerRepository`,
+    but it is not isolated from SQLAlchemy: it builds the ORM `Customer` and it imports the
+    `IntegrityError` that the repository's `add` lets through."""
 
     def __init__(self, repository: CustomerRepository) -> None:
         self.repository = repository
@@ -21,7 +22,9 @@ class CustomerService:
         """New customers always start as PENDING, whatever the caller sends."""
         customer = Customer(name=name, email=email, status=CustomerStatus.PENDING.value)
         # No "does it exist?" query first: it would race with a concurrent insert. The
-        # database is the only one that can reject a duplicate for sure.
+        # database is the only one that can reject a duplicate for sure. `add` lets the
+        # IntegrityError through (see CustomerRepository), and every IntegrityError means a
+        # duplicate email: that is the only constraint an insert of a valid customer can violate.
         try:
             return self.repository.add(customer)
         except IntegrityError as exc:

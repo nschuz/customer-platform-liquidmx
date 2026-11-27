@@ -360,10 +360,13 @@ Una petición recorre router → servicio → repositorio:
    DTO de salida.
 2. El **servicio** (`CustomerService`) aplica las reglas: un cliente nuevo siempre es `PENDING`,
    y lo que no cumple una regla lanza una excepción de dominio (`EmailAlreadyExists`,
-   `CustomerNotFound`). No sabe nada de HTTP.
-3. El **repositorio** guarda y consulta con SQLAlchemy. El servicio depende de la interfaz
-   `CustomerRepository` (un `Protocol`); la implementación de SQLAlchemy se inyecta con una
-   dependencia de FastAPI.
+   `CustomerNotFound`). No sabe nada de HTTP. El `IntegrityError` que deja pasar el repositorio
+   se convierte en `EmailAlreadyExists` sin mirar qué restricción lo provocó: hoy la única que
+   puede rechazar el insert de un cliente válido es la de `UNIQUE` del email.
+3. El **repositorio** guarda y consulta con SQLAlchemy, detrás de la interfaz `CustomerRepository`
+   (un `Protocol`); la implementación de SQLAlchemy se inyecta con una dependencia de FastAPI.
+   El contrato incluye los errores: `add` deja pasar `IntegrityError` cuando una restricción de la
+   base de datos rechaza el insert.
 4. `core/exceptions.py` traduce cada excepción a la respuesta con el formato de error único.
 
 ### Middleware
@@ -411,12 +414,16 @@ nada. Para trabajar con la lista vacía, no lo ejecutes (o borra `customers.db` 
 
 ## Decisiones técnicas y trade-offs
 
-- **Capas + Repository.** El servicio depende de una interfaz y no de SQLAlchemy ni de FastAPI.
-  No hay entidades de dominio separadas del modelo ORM ni unit-of-work: para tres operaciones
-  serían indirección sin beneficio.
+- **Capas + Repository.** El servicio accede a la persistencia a través de la interfaz
+  `CustomerRepository` y no conoce FastAPI ni códigos HTTP. No está aislado de SQLAlchemy: usa el
+  modelo ORM `Customer` (no hay entidades de dominio separadas) e importa `IntegrityError`, la
+  excepción con la que el repositorio avisa de que la base de datos rechazó un insert. Tampoco hay
+  unit-of-work: para tres operaciones sería indirección sin beneficio.
 - **El `409` sale de la base de datos.** No hay consulta previa de "¿existe este email?": dos
   peticiones concurrentes podrían pasarla. La restricción `UNIQUE` es la que decide, y el
   `IntegrityError` se traduce a `409`. Un test lo comprueba observando el error que emite SQLite.
+  La traducción no distingue restricciones: cualquier `IntegrityError` del insert se responde
+  como email duplicado, porque hoy esa es la única que puede violarse.
 - **SQLite, portable por diseño.** Tipos portables (`Uuid`, `DateTime(timezone=True)`),
   migraciones en modo batch y la URL en configuración. Verificado con SQLite; PostgreSQL no se ha
   probado.

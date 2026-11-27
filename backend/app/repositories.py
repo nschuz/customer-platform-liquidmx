@@ -1,4 +1,5 @@
-"""Persistence behind a narrow interface, so the service does not depend on SQLAlchemy."""
+"""Persistence behind the `CustomerRepository` interface, which is all the service sees of
+storage, except for the exception that the contract below lets through."""
 
 import uuid
 from typing import Protocol
@@ -11,7 +12,14 @@ from app.schemas import CustomerStatus
 
 
 class CustomerRepository(Protocol):
-    """What the service needs from storage (inversion of dependencies)."""
+    """What the service needs from storage (inversion of dependencies).
+
+    Contract of `add`: it raises `sqlalchemy.exc.IntegrityError`, without catching it, when a
+    database constraint rejects the insert. The service maps every `IntegrityError` to
+    `EMAIL_ALREADY_EXISTS` without checking which constraint was violated. That is right today,
+    because the unique constraint on `email` is the only one the insert of a valid customer can
+    violate; any other (a primary-key collision, for example) would be reported the same way.
+    """
 
     def add(self, customer: Customer) -> Customer: ...
 
@@ -29,6 +37,7 @@ class SQLAlchemyCustomerRepository:
         self.session = session
 
     def add(self, customer: Customer) -> Customer:
+        """Raises `IntegrityError` when a constraint rejects the insert (the contract above)."""
         self.session.add(customer)
         self.session.commit()
         return customer
