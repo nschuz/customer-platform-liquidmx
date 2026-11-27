@@ -15,7 +15,7 @@ from tests.factories import add_customer, stored_customer
 
 NOW = datetime(2026, 11, 27, 12, 0, tzinfo=UTC)
 
-# The table of the assessment, oldest registration first.
+# The demo customers, oldest registration first.
 DEMO_CUSTOMERS = [
     ("Juan Pérez", "juan.perez@example.com", "ACTIVE"),
     ("María Fernández", "maria.fernandez@example.com", "ACTIVE"),
