@@ -2,7 +2,7 @@
 	"info": {
 		"name": "Customer Platform API",
 		"_postman_id": "b1a2c3d4-0000-4000-8000-customerplatform",
-		"description": "Colección de la Customer Management API (backend FastAPI) del proyecto customer-platform.\n\nAntes de usar: levanta el backend (`docker compose up --build` desde la raíz del repo, o `make dev-backend`). La variable `base_url` apunta por defecto a http://localhost:8000.\n\nToda respuesta de error comparte el envelope `{\"error\": {\"code\", \"message\", \"request_id\", \"details\"?}}`, y toda respuesta lleva `X-Request-ID`.\n\nImportable en Postman (Collection v2.1) e Insomnia.",
+		"description": "Colección de la Customer Management API (backend FastAPI) del proyecto customer-platform.\n\nAntes de usar: levanta el backend (`docker compose up --build` desde la raíz del repo, o `make dev-backend`). La variable `base_url` apunta por defecto a http://localhost:8000. Para probar contra la demo en línea, cambia `base_url` a https://customer-platform-api.onrender.com (ten en cuenta que duerme tras ~15 min sin tráfico).\n\nToda respuesta de error comparte el envelope `{\"error\": {\"code\", \"message\", \"request_id\", \"details\"?}}`, y toda respuesta lleva `X-Request-ID`.\n\nImportable en Postman (Collection v2.1) e Insomnia.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -25,8 +25,12 @@
 				"header": [],
 				"url": {
 					"raw": "{{base_url}}/health",
-					"host": ["{{base_url}}"],
-					"path": ["health"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
 				},
 				"description": "Comprobación de vida. Devuelve exactamente `{\"status\":\"ok\"}` y no toca la base de datos."
 			},
@@ -67,12 +71,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Sofía Navarro\",\n  \"email\": \"sofia.navarro@example.com\"\n}"
+							"raw": "{\n  \"name\": \"Sofía Navarro\",\n  \"email\": \"sofia.navarro@liquidmx.com\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/customers",
-							"host": ["{{base_url}}"],
-							"path": ["customers"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers"
+							]
 						},
 						"description": "`201` con el cliente creado. El estado inicial siempre es `PENDING`, aunque el body traiga otra cosa (el body solo acepta `name` y `email`). Un email que ya existe (incluso con otras mayúsculas) responde `409` con `EMAIL_ALREADY_EXISTS`."
 					},
@@ -99,7 +107,7 @@
 							"name": "201 creado",
 							"status": "Created",
 							"code": 201,
-							"body": "{\n  \"id\": \"e56ec016-7746-4510-8295-d1af66714048\",\n  \"name\": \"Sofía Navarro\",\n  \"email\": \"sofia.navarro@example.com\",\n  \"status\": \"PENDING\",\n  \"created_at\": \"2026-11-27T20:54:40.569009Z\"\n}"
+							"body": "{\n  \"id\": \"e56ec016-7746-4510-8295-d1af66714048\",\n  \"name\": \"Sofía Navarro\",\n  \"email\": \"sofia.navarro@liquidmx.com\",\n  \"status\": \"PENDING\",\n  \"created_at\": \"2026-11-27T20:54:40.569009Z\"\n}"
 						},
 						{
 							"name": "409 duplicado",
@@ -116,8 +124,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/customers",
-							"host": ["{{base_url}}"],
-							"path": ["customers"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers"
+							]
 						},
 						"description": "`200` con un array plano ordenado por `created_at` descendente (desempate por `id`). Sin datos: `[]`."
 					},
@@ -143,8 +155,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/customers?status=ACTIVE",
-							"host": ["{{base_url}}"],
-							"path": ["customers"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers"
+							],
 							"query": [
 								{
 									"key": "status",
@@ -163,8 +179,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/customers/{{customer_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["customers", "{{customer_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers",
+								"{{customer_id}}"
+							]
 						},
 						"description": "`200` con el cliente. Usa la variable `customer_id` (se guarda sola al crear uno con esta colección). Un id inexistente responde `404` con `CUSTOMER_NOT_FOUND`; un id mal formado, `422`."
 					},
@@ -173,7 +194,7 @@
 							"name": "200 encontrado",
 							"status": "OK",
 							"code": 200,
-							"body": "{\n  \"id\": \"36310aa0-bcc8-4668-8fcc-0969a389383a\",\n  \"name\": \"Carlos López\",\n  \"email\": \"carlos.lopez@example.com\",\n  \"status\": \"PENDING\",\n  \"created_at\": \"2026-10-15T20:54:37.246901Z\"\n}"
+							"body": "{\n  \"id\": \"36310aa0-bcc8-4668-8fcc-0969a389383a\",\n  \"name\": \"Carlos López\",\n  \"email\": \"carlos.lopez@liquidmx.com\",\n  \"status\": \"PENDING\",\n  \"created_at\": \"2026-10-15T20:54:37.246901Z\"\n}"
 						},
 						{
 							"name": "404 no existe",
@@ -199,8 +220,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/customers/{{customer_id}}/status",
-							"host": ["{{base_url}}"],
-							"path": ["customers", "{{customer_id}}", "status"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers",
+								"{{customer_id}}",
+								"status"
+							]
 						},
 						"description": "`200` con el cliente actualizado. Idempotente: repetir el mismo estado devuelve `200` igual. Un `status` fuera de `ACTIVE|PENDING|BLOCKED` responde `422` con el detalle por campo; un id inexistente, `404`."
 					},
@@ -223,7 +250,7 @@
 							"name": "200 actualizado",
 							"status": "OK",
 							"code": 200,
-							"body": "{\n  \"id\": \"36310aa0-bcc8-4668-8fcc-0969a389383a\",\n  \"name\": \"Carlos López\",\n  \"email\": \"carlos.lopez@example.com\",\n  \"status\": \"ACTIVE\",\n  \"created_at\": \"2026-10-15T20:54:37.246901Z\"\n}"
+							"body": "{\n  \"id\": \"36310aa0-bcc8-4668-8fcc-0969a389383a\",\n  \"name\": \"Carlos López\",\n  \"email\": \"carlos.lopez@liquidmx.com\",\n  \"status\": \"ACTIVE\",\n  \"created_at\": \"2026-10-15T20:54:37.246901Z\"\n}"
 						},
 						{
 							"name": "422 estado inválido",
@@ -254,8 +281,12 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/customers",
-							"host": ["{{base_url}}"],
-							"path": ["customers"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers"
+							]
 						},
 						"description": "Validación de Pydantic con el envelope unificado: `details` lista cada campo fallido."
 					},
@@ -283,8 +314,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/customers/00000000-0000-0000-0000-000000000000",
-							"host": ["{{base_url}}"],
-							"path": ["customers", "00000000-0000-0000-0000-000000000000"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customers",
+								"00000000-0000-0000-0000-000000000000"
+							]
 						},
 						"description": "Uuid bien formado que no existe en la base."
 					},
@@ -315,8 +351,12 @@
 						],
 						"url": {
 							"raw": "{{base_url}}/health",
-							"host": ["{{base_url}}"],
-							"path": ["health"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
 						},
 						"description": "Si la petición trae un `X-Request-ID` válido, la respuesta lo reutiliza; si trae uno inválido (más de 128 caracteres o caracteres fuera de `[A-Za-z0-9._-]`), se genera uno nuevo y el inválido no se devuelve. Ese mismo id va en los errores y en el log."
 					},

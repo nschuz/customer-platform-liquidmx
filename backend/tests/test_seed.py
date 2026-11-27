@@ -17,16 +17,16 @@ NOW = datetime(2026, 11, 27, 12, 0, tzinfo=UTC)
 
 # The demo customers, oldest registration first.
 DEMO_CUSTOMERS = [
-    ("Juan Pérez", "juan.perez@example.com", "ACTIVE"),
-    ("María Fernández", "maria.fernandez@example.com", "ACTIVE"),
-    ("Carlos López", "carlos.lopez@example.com", "PENDING"),
-    ("Ana Martínez", "ana.martinez@example.com", "ACTIVE"),
-    ("Luis García", "luis.garcia@example.com", "BLOCKED"),
-    ("Laura Sánchez", "laura.sanchez@example.com", "ACTIVE"),
-    ("Pedro Gómez", "pedro.gomez@example.com", "PENDING"),
-    ("Carmen Ruiz", "carmen.ruiz@example.com", "BLOCKED"),
-    ("Javier Moreno", "javier.moreno@example.com", "ACTIVE"),
-    ("Lucía Díaz", "lucia.diaz@example.com", "PENDING"),
+    ("Juan Pérez", "juan.perez@liquidmx.com", "ACTIVE"),
+    ("María Fernández", "maria.fernandez@liquidmx.com", "ACTIVE"),
+    ("Carlos López", "carlos.lopez@liquidmx.com", "PENDING"),
+    ("Ana Martínez", "ana.martinez@liquidmx.com", "ACTIVE"),
+    ("Luis García", "luis.garcia@liquidmx.com", "BLOCKED"),
+    ("Laura Sánchez", "laura.sanchez@liquidmx.com", "ACTIVE"),
+    ("Pedro Gómez", "pedro.gomez@liquidmx.com", "PENDING"),
+    ("Carmen Ruiz", "carmen.ruiz@liquidmx.com", "BLOCKED"),
+    ("Javier Moreno", "javier.moreno@liquidmx.com", "ACTIVE"),
+    ("Lucía Díaz", "lucia.diaz@liquidmx.com", "PENDING"),
 ]
 # Counted on a calendar: 55, 49, 43, ... 1 days before 2026-11-27 12:00 UTC.
 REGISTRATION_TIMES = [
@@ -96,7 +96,7 @@ def test_seed_only_adds_the_customers_that_are_missing(engine: Engine) -> None:
     juan = add_customer(
         engine,
         "Juan Pérez",
-        "juan.perez@example.com",
+        "juan.perez@liquidmx.com",
         status="BLOCKED",
         created_at=NOW - timedelta(days=4000),
     )

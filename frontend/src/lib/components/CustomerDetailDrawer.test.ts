@@ -10,14 +10,14 @@ vi.mock('$app/env/public', () => ({ PUBLIC_API_URL: undefined }));
 const customer: Customer = {
 	id: '6a25261c-26e6-4bc1-b4ba-fd12643c1150',
 	name: 'Carmen Ruiz',
-	email: 'carmen.ruiz@example.com',
+	email: 'carmen.ruiz@liquidmx.com',
 	status: 'BLOCKED',
 	created_at: '2026-11-09T15:55:00.000Z'
 };
 const anotherCustomer: Customer = {
 	id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
 	name: 'Juan Pérez',
-	email: 'juan.perez@example.com',
+	email: 'juan.perez@liquidmx.com',
 	status: 'ACTIVE',
 	created_at: '2026-09-29T08:15:00.000Z'
 };
@@ -63,7 +63,7 @@ describe('CustomerDetailDrawer', () => {
 		renderDrawer();
 
 		const dialog = screen.getByRole('dialog');
-		expect(dialog.textContent).toContain('carmen.ruiz@example.com');
+		expect(dialog.textContent).toContain('carmen.ruiz@liquidmx.com');
 		expect(dialog.textContent).toContain('Bloqueado');
 		expect(dialog.textContent).toContain('BLOCKED');
 		expect(dialog.textContent).toContain('09 nov 2026, 15:55 UTC');

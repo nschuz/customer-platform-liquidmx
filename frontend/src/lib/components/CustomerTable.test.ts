@@ -7,14 +7,14 @@ const customers: Customer[] = [
 	{
 		id: '57c15356-e1b1-4b35-9653-aa4c937e4606',
 		name: 'Juan Pérez',
-		email: 'juan.perez@example.com',
+		email: 'juan.perez@liquidmx.com',
 		status: 'ACTIVE',
 		created_at: '2026-09-29T08:15:00.000Z'
 	},
 	{
 		id: '6a25261c-26e6-4bc1-b4ba-fd12643c1150',
 		name: 'Carmen Ruiz',
-		email: 'carmen.ruiz@example.com',
+		email: 'carmen.ruiz@liquidmx.com',
 		status: 'BLOCKED',
 		created_at: '2026-11-09T15:55:00.000Z'
 	}
@@ -49,7 +49,7 @@ describe('CustomerTable', () => {
 
 		expect(within(table).getAllByRole('row')).toHaveLength(3);
 		expect(table.textContent).toContain('Juan Pérez');
-		expect(table.textContent).toContain('juan.perez@example.com');
+		expect(table.textContent).toContain('juan.perez@liquidmx.com');
 		expect(within(table).getByText('Activo')).toBeTruthy();
 		expect(within(table).getByText('Bloqueado')).toBeTruthy();
 	});

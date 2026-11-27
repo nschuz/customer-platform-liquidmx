@@ -9,16 +9,16 @@ const UNKNOWN_ID = '0b9d5a3e-6c1f-4e2b-9d7a-2f4c8e1a3b5c';
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 const SEED_EMAILS_NEWEST_FIRST = [
-	'lucia.diaz@example.com',
-	'javier.moreno@example.com',
-	'carmen.ruiz@example.com',
-	'pedro.gomez@example.com',
-	'laura.sanchez@example.com',
-	'luis.garcia@example.com',
-	'ana.martinez@example.com',
-	'carlos.lopez@example.com',
-	'maria.fernandez@example.com',
-	'juan.perez@example.com'
+	'lucia.diaz@liquidmx.com',
+	'javier.moreno@liquidmx.com',
+	'carmen.ruiz@liquidmx.com',
+	'pedro.gomez@liquidmx.com',
+	'laura.sanchez@liquidmx.com',
+	'luis.garcia@liquidmx.com',
+	'ana.martinez@liquidmx.com',
+	'carlos.lopez@liquidmx.com',
+	'maria.fernandez@liquidmx.com',
+	'juan.perez@liquidmx.com'
 ];
 
 interface ErrorEnvelope {
@@ -94,7 +94,7 @@ describe('GET /api/customers', () => {
 		expect(customers[0]).toEqual({
 			id: '3f3fc070-e756-470b-87ce-5e22114e371e',
 			name: 'Lucía Díaz',
-			email: 'lucia.diaz@example.com',
+			email: 'lucia.diaz@liquidmx.com',
 			status: 'PENDING',
 			created_at: '2026-11-23T19:50:00.000Z'
 		});
@@ -113,7 +113,7 @@ describe('GET /api/customers', () => {
 			for (const name of ['Primero', 'Segundo', 'Tercero']) {
 				await call(collection.POST, {
 					method: 'POST',
-					body: { name, email: `${name.toLowerCase()}@example.com` }
+					body: { name, email: `${name.toLowerCase()}@liquidmx.com` }
 				});
 			}
 
@@ -140,15 +140,15 @@ describe('GET /api/customers', () => {
 		[
 			'ACTIVE',
 			[
-				'javier.moreno@example.com',
-				'laura.sanchez@example.com',
-				'ana.martinez@example.com',
-				'maria.fernandez@example.com',
-				'juan.perez@example.com'
+				'javier.moreno@liquidmx.com',
+				'laura.sanchez@liquidmx.com',
+				'ana.martinez@liquidmx.com',
+				'maria.fernandez@liquidmx.com',
+				'juan.perez@liquidmx.com'
 			]
 		],
-		['PENDING', ['lucia.diaz@example.com', 'pedro.gomez@example.com', 'carlos.lopez@example.com']],
-		['BLOCKED', ['carmen.ruiz@example.com', 'luis.garcia@example.com']]
+		['PENDING', ['lucia.diaz@liquidmx.com', 'pedro.gomez@liquidmx.com', 'carlos.lopez@liquidmx.com']],
+		['BLOCKED', ['carmen.ruiz@liquidmx.com', 'luis.garcia@liquidmx.com']]
 	])('filters by status=%s', async (status, emails) => {
 		const { collection } = await loadRoutes();
 
@@ -173,7 +173,7 @@ describe('GET /api/customers', () => {
 });
 
 describe('POST /api/customers', () => {
-	const newCustomer = { name: 'Sofía Romero', email: 'sofia.romero@example.com' };
+	const newCustomer = { name: 'Sofía Romero', email: 'sofia.romero@liquidmx.com' };
 
 	it('creates the customer as PENDING and returns it with a 201', async () => {
 		const { collection } = await loadRoutes();
@@ -187,7 +187,7 @@ describe('POST /api/customers', () => {
 		expect(created.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
 
 		const list = await call(collection.GET);
-		expect(await emailsIn(list)).toEqual(['sofia.romero@example.com', ...SEED_EMAILS_NEWEST_FIRST]);
+		expect(await emailsIn(list)).toEqual(['sofia.romero@liquidmx.com', ...SEED_EMAILS_NEWEST_FIRST]);
 	});
 
 	it('ignores unknown fields and normalizes the email', async () => {
@@ -195,11 +195,11 @@ describe('POST /api/customers', () => {
 
 		const response = await call(collection.POST, {
 			method: 'POST',
-			body: { ...newCustomer, email: ' SOFIA.Romero@Example.com ', status: 'ACTIVE', id: JUAN_ID }
+			body: { ...newCustomer, email: ' SOFIA.Romero@LiquidMX.com ', status: 'ACTIVE', id: JUAN_ID }
 		});
 
 		expect(response.status).toBe(201);
-		expect(((await response.json()) as Customer).email).toBe('sofia.romero@example.com');
+		expect(((await response.json()) as Customer).email).toBe('sofia.romero@liquidmx.com');
 	});
 
 	it('rejects a duplicate email, whatever the case, with a 409', async () => {
@@ -207,7 +207,7 @@ describe('POST /api/customers', () => {
 
 		const response = await call(collection.POST, {
 			method: 'POST',
-			body: { name: 'Otro Juan', email: 'JUAN.PEREZ@EXAMPLE.COM' }
+			body: { name: 'Otro Juan', email: 'JUAN.PEREZ@LIQUIDMX.COM' }
 		});
 
 		await errorOf(response, 409, 'EMAIL_ALREADY_EXISTS');
@@ -244,11 +244,11 @@ describe('POST /api/customers', () => {
 
 			const response = await call(collection.POST, {
 				method: 'POST',
-				body: { name: 'Sofía Romero', email: 'sofia.romero@example.com' }
+				body: { name: 'Sofía Romero', email: 'sofia.romero@liquidmx.com' }
 			});
 
 			expect(response.status).toBe(201);
-			expect(await emailsIn(await call(collection.GET))).toEqual(['sofia.romero@example.com']);
+			expect(await emailsIn(await call(collection.GET))).toEqual(['sofia.romero@liquidmx.com']);
 		} finally {
 			vi.doUnmock('$app/env/private');
 			vi.resetModules();

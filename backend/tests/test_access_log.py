@@ -67,7 +67,7 @@ def test_the_line_reports_the_status_that_was_answered(
     client: TestClient, caplog: pytest.LogCaptureFixture
 ) -> None:
     with caplog.at_level(logging.INFO, logger=ACCESS_LOGGER):
-        client.post("/customers", json={"name": "", "email": "ana@example.com"})
+        client.post("/customers", json={"name": "", "email": "ana@liquidmx.com"})
 
     [entry] = access_entries(caplog)
     assert entry["method"] == "POST"
@@ -80,10 +80,10 @@ def test_the_line_holds_no_personal_data(
 ) -> None:
     """Names and emails travel in the body only; they must never reach the logs."""
     with caplog.at_level(logging.INFO, logger=ACCESS_LOGGER):
-        client.post("/customers", json={"name": "Juan Pérez", "email": "juan.perez@example.com"})
+        client.post("/customers", json={"name": "Juan Pérez", "email": "juan.perez@liquidmx.com"})
 
     lines = [JsonFormatter().format(record) for record in caplog.records]
     assert any(json.loads(line)["logger"] == ACCESS_LOGGER for line in lines)
     for line in lines:
         assert "Juan" not in line
-        assert "juan.perez@example.com" not in line
+        assert "juan.perez@liquidmx.com" not in line
