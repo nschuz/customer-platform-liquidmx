@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+/* The small palette of the dashboard: light theme only. */
+@theme {
+	--color-page: var(--color-gray-50); /* lightest fill: hovered rows, pill counts */
+	--color-surface: #ffffff; /* cards, table, drawer */
+	--color-line: var(--color-gray-200); /* borders that only separate */
+	--color-line-strong: var(--color-gray-500); /* boundaries that identify a control, 4.8:1 on white */
+	--color-ink: var(--color-gray-900); /* primary text */
+	--color-muted: var(--color-gray-500); /* secondary text, 4.6:1 on page */
+	--color-accent: var(--color-indigo-600); /* primary actions and focus rings */
+
+	/* Each status colour doubles as badge text on a 10 % tint of itself: 5.4:1 or more. */
+	--color-status-active: var(--color-green-800);
+	--color-status-pending: var(--color-amber-800);
+	--color-status-blocked: var(--color-red-700);
+
+	/* Entrance of the drawer. Used as motion-safe:animate-slide-in, so reduced motion skips it. */
+	--animate-slide-in: slide-in 250ms ease-out;
+
+	@keyframes slide-in {
+		from {
+			transform: translateX(100%);
+		}
+		to {
+			transform: translateX(0);
+		}
+	}
+}
+
+@layer base {
+	/* The scrollbar keeps its space even when the scroll is locked for the drawer, so the page
+	   does not shift sideways when the drawer opens or closes. */
+	html {
+		scrollbar-gutter: stable;
+	}
+
+	/* One visible focus ring for every control, instead of repeating it on each element. */
+	:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+}
