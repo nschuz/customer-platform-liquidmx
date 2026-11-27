@@ -351,7 +351,9 @@ uv run mypy app
   fixture) e inyectan la sesión con un override de dependencias. Ninguno toca `customers.db` ni
   necesita red, y pasan en cualquier orden.
 - Tampoco dependen del entorno: la configuración que usan (`cors_origins`, `database_url`) la fija
-  un fixture, así que las variables de entorno y el archivo `.env` no cambian el resultado.
+  un fixture, así que variables como `CORS_ORIGINS` no cambian el resultado. La única excepción es
+  un `DATABASE_URL` con un motor cuyo driver no esté instalado, que falla al importar la
+  aplicación antes de llegar a los fixtures.
 - Un test ejecuta la CLI real de Alembic sobre un archivo temporal y comprueba que el esquema
   migrado es el que declaran los modelos. Otro arranca la aplicación con sus dependencias reales
   sobre un archivo SQLite.
