@@ -62,10 +62,3 @@ disallow_untyped_defs = true
 check_untyped_defs = true
 warn_unused_ignores = true
 warn_redundant_casts = true
-
-[[tool.mypy.overrides]]
-# Both directories are still type-checked, function bodies included; only the "every
-# function annotated" rule is dropped: Alembic generates its files and tests read better
-# with untyped fixtures.
-module = ["alembic.*", "tests.*"]
-disallow_untyped_defs = false
