@@ -17,11 +17,11 @@ def logged_names(capsys: pytest.CaptureFixture[str]) -> list[str]:
 
 
 def test_starting_the_app_configures_json_logging(
-    capsys: pytest.CaptureFixture[str],
+    settings: Settings, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """The server runs the lifespan at startup, after installing its own loggers: that is the
     moment to configure ours. Whatever is logged afterwards comes out as JSON."""
-    with TestClient(create_app(Settings(_env_file=None))) as client:
+    with TestClient(create_app(settings)) as client:
         client.get("/health")
 
     names = logged_names(capsys)  # would raise on any line that is not JSON

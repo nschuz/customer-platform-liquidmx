@@ -17,6 +17,7 @@ from app.db import Base, create_db_engine, get_session
 from app.main import create_app
 
 UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
+DASHBOARD_ORIGIN = "http://localhost:5173"  # the default of CORS_ORIGINS
 
 
 @pytest.fixture(autouse=True)
@@ -60,15 +61,22 @@ def engine() -> Generator[Engine]:
 
 
 @pytest.fixture
-def app(engine: Engine) -> FastAPI:
-    """The application, with default settings, wired to the test database. Every request gets
+def settings() -> Settings:
+    """Settings fixed by the tests, whatever the environment or a `.env` file holds. Every
+    value a test depends on is spelled out here; tests that need another one derive from it."""
+    return Settings(_env_file=None, cors_origins=[DASHBOARD_ORIGIN], database_url="sqlite://")
+
+
+@pytest.fixture
+def app(settings: Settings, engine: Engine) -> FastAPI:
+    """The application, wired to the test database with the settings above. Every request gets
     its own session, as in production, so a test can only observe what was really committed."""
 
     def test_session() -> Generator[Session]:
         with Session(engine) as session:
             yield session
 
-    app = create_app(Settings(_env_file=None))
+    app = create_app(settings)
     app.dependency_overrides[get_session] = test_session
     return app
 

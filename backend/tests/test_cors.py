@@ -14,9 +14,11 @@ STRANGER = "https://stranger.example.com"
 
 
 @pytest.fixture
-def client() -> Generator[TestClient]:
-    settings = Settings(_env_file=None, cors_origins=[DASHBOARD, STAGING])
-    yield TestClient(create_app(settings))
+def client(settings: Settings) -> Generator[TestClient]:
+    """The application allowing two origins: the fixed settings with the one value these tests
+    are about replaced."""
+    two_origins = settings.model_copy(update={"cors_origins": [DASHBOARD, STAGING]})
+    yield TestClient(create_app(two_origins))
 
 
 PREFLIGHT = {
