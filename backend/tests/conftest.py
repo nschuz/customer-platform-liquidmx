@@ -28,17 +28,16 @@ def engine() -> Generator[Engine]:
 
 
 @pytest.fixture
-def session(engine: Engine) -> Generator[Session]:
-    """A session on the test database, shared with the application under test."""
-    with Session(engine) as session:
-        yield session
+def client(engine: Engine) -> Generator[TestClient]:
+    """HTTP client on the test database. Every request gets its own session, as in production,
+    so a test can only observe what was really committed."""
 
+    def test_session() -> Generator[Session]:
+        with Session(engine) as session:
+            yield session
 
-@pytest.fixture
-def client(session: Session) -> Generator[TestClient]:
-    """HTTP client whose requests run on the test's isolated database session."""
     app = create_app()
-    app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_session] = test_session
     with TestClient(app) as client:
         yield client
 

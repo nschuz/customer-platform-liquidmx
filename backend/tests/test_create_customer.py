@@ -5,9 +5,8 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, event
-from sqlalchemy.orm import Session
 
-from app.models import Customer
+from tests.factories import add_customer
 
 
 def test_create_returns_201_with_pending_status_and_utc_timestamp(client: TestClient) -> None:
@@ -76,15 +75,14 @@ def test_create_rejects_an_email_that_already_exists(client: TestClient, second_
 
 
 def test_duplicate_detection_comes_from_the_database_constraint(
-    client: TestClient, engine: Engine, session: Session
+    client: TestClient, engine: Engine
 ) -> None:
     """The row appears behind the API's back, as a concurrent request would create it."""
     rejected: list[object] = []
     event.listen(
         engine, "handle_error", lambda context: rejected.append(context.original_exception)
     )
-    session.add(Customer(name="Existing", email="juan.perez@example.com", status="PENDING"))
-    session.commit()
+    add_customer(engine, "Existing", "juan.perez@example.com")
 
     response = client.post(
         "/customers", json={"name": "Juan Pérez", "email": "juan.perez@example.com"}

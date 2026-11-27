@@ -3,33 +3,34 @@
 from datetime import UTC, datetime
 
 import pytest
+from sqlalchemy import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Customer
 
 
-def test_new_customer_gets_its_id_and_created_at_from_the_server(session: Session) -> None:
+def test_new_customer_gets_its_id_and_created_at_from_the_server(engine: Engine) -> None:
     before = datetime.now(UTC)
 
-    customer = Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING")
-    session.add(customer)
-    session.flush()
+    with Session(engine) as session:
+        customer = Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING")
+        session.add(customer)
+        session.flush()
 
-    after = datetime.now(UTC)
-    assert customer.id.version == 4
-    assert customer.created_at.tzinfo == UTC
-    assert before <= customer.created_at <= after
+        after = datetime.now(UTC)
+        assert customer.id.version == 4
+        assert customer.created_at.tzinfo == UTC
+        assert before <= customer.created_at <= after
 
 
-def test_email_is_unique_in_the_database(session: Session) -> None:
+def test_email_is_unique_in_the_database(engine: Engine) -> None:
     """The constraint is the real duplicate check: a race can slip past any earlier query."""
-    session.add_all(
-        [
-            Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING"),
-            Customer(name="Juan otra vez", email="juan.perez@example.com", status="ACTIVE"),
-        ]
-    )
-
-    with pytest.raises(IntegrityError, match=r"customers\.email"):
+    with Session(engine) as session, pytest.raises(IntegrityError, match=r"customers\.email"):
+        session.add_all(
+            [
+                Customer(name="Juan Pérez", email="juan.perez@example.com", status="PENDING"),
+                Customer(name="Juan otra vez", email="juan.perez@example.com", status="ACTIVE"),
+            ]
+        )
         session.flush()
