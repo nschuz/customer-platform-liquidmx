@@ -100,6 +100,42 @@ describe('GET /api/customers', () => {
 		});
 	});
 
+	it('breaks a tie between identical timestamps by id, the greatest first, like the backend', async () => {
+		// Created in the same millisecond and, by id, in this order: middle, least, greatest. Neither
+		// the insertion order nor the ascending one is the expected one.
+		vi.useFakeTimers({ now: new Date('2026-11-27T12:00:00.000Z') });
+		vi.spyOn(crypto, 'randomUUID')
+			.mockReturnValueOnce('55555555-5555-4555-8555-555555555555')
+			.mockReturnValueOnce('00000000-0000-0000-0000-000000000001')
+			.mockReturnValueOnce('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+		try {
+			const { collection } = await loadRoutes();
+			for (const name of ['Primero', 'Segundo', 'Tercero']) {
+				await call(collection.POST, {
+					method: 'POST',
+					body: { name, email: `${name.toLowerCase()}@example.com` }
+				});
+			}
+
+			const newest = (await customersIn(await call(collection.GET))).slice(0, 3);
+
+			// The tie is a real one: the three share their timestamp.
+			expect(newest.map((customer) => customer.created_at)).toEqual([
+				'2026-11-27T12:00:00.000Z',
+				'2026-11-27T12:00:00.000Z',
+				'2026-11-27T12:00:00.000Z'
+			]);
+			expect(newest.map((customer) => customer.id)).toEqual([
+				'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+				'55555555-5555-4555-8555-555555555555',
+				'00000000-0000-0000-0000-000000000001'
+			]);
+		} finally {
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
+
 	it.each([
 		[
 			'ACTIVE',
