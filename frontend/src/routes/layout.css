@@ -1,1 +1,16 @@
 @import 'tailwindcss';
+
+/* The small palette of the dashboard: light theme only. */
+@theme {
+	--color-page: var(--color-gray-50); /* app background */
+	--color-surface: #ffffff; /* cards, table, drawer */
+	--color-line: var(--color-gray-200); /* borders */
+	--color-ink: var(--color-gray-900); /* primary text */
+	--color-muted: var(--color-gray-500); /* secondary text, 4.6:1 on page */
+	--color-accent: var(--color-indigo-600); /* primary actions and focus rings */
+
+	/* Each status colour doubles as badge text on a 10 % tint of itself: 5.4:1 or more. */
+	--color-status-active: var(--color-green-800);
+	--color-status-pending: var(--color-amber-800);
+	--color-status-blocked: var(--color-red-700);
+}
