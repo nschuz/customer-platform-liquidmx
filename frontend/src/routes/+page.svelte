@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import CustomerCard from '#lib/components/CustomerCard.svelte';
+	import CustomerDetailDrawer from '#lib/components/CustomerDetailDrawer.svelte';
 	import CustomerFilters from '#lib/components/CustomerFilters.svelte';
 	import CustomerTable from '#lib/components/CustomerTable.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
@@ -9,21 +10,27 @@
 	import SkeletonLoader from '#lib/components/SkeletonLoader.svelte';
 	import { customersStore } from '#lib/customers.svelte.ts';
 	import { API_HOST, IS_MOCK_API } from '#lib/services/customerApi.ts';
-	import type { StatusFilter } from '#lib/types/customer.ts';
+	import type { Customer, StatusFilter } from '#lib/types/customer.ts';
 	import { DISPLAY_TIME_ZONE } from '#lib/utils/formatters.ts';
 	import { countByStatus, filterCustomers } from '#lib/utils/search.ts';
 
 	const store = customersStore;
 
-	// UI state: what the user typed and selected. The data itself lives in the store.
+	// UI state: what the user typed, selected and opened. The data itself lives in the store.
 	let searchText = $state('');
 	let query = $state('');
 	let activeStatus = $state<StatusFilter>('ALL');
+	let selectedId = $state<string | null>(null);
+	/** The "Ver detalle" button that opened the drawer. It gets the focus back when it closes. */
+	let detailOpener: HTMLElement | null = null;
 
 	// The counts follow the search only; the list also follows the status pill.
 	const statusCounts = $derived(countByStatus(store.customers, query));
 	const visibleCustomers = $derived(
 		filterCustomers(store.customers, { query, status: activeStatus })
+	);
+	const selectedCustomer = $derived(
+		store.customers.find((customer) => customer.id === selectedId) ?? null
 	);
 
 	// Data is fetched in the browser, so the server only renders the shell with its skeletons.
@@ -47,13 +54,29 @@
 	function retry() {
 		void store.load();
 	}
+
+	function openDetail(customer: Customer) {
+		// Read now: once the page turns inert, the browser drops the focus from the button.
+		detailOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		selectedId = customer.id;
+	}
+
+	async function closeDetail() {
+		selectedId = null;
+		await tick(); // only then is the page no longer inert and the button focusable again
+		detailOpener?.focus();
+	}
 </script>
 
 <svelte:head>
 	<title>Customer Dashboard</title>
 </svelte:head>
 
-<div class="mx-auto flex min-h-dvh max-w-5xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+<!-- Inert while the drawer is open: the rest of the page is neither focusable nor read. -->
+<div
+	class="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 py-6 sm:px-6 lg:px-8"
+	inert={selectedCustomer !== null}
+>
 	<main class="flex-1">
 		<header class="mb-6">
 			<h1 class="text-2xl font-semibold text-ink">Customer Dashboard</h1>
@@ -94,11 +117,11 @@
 				<EmptyState variant="no-results" onClearFilters={clearFilters} />
 			{:else}
 				<div class="hidden md:block">
-					<CustomerTable customers={visibleCustomers} />
+					<CustomerTable customers={visibleCustomers} onShowDetail={openDetail} />
 				</div>
 				<ul class="space-y-3 md:hidden">
 					{#each visibleCustomers as customer (customer.id)}
-						<CustomerCard {customer} />
+						<CustomerCard {customer} onShowDetail={openDetail} />
 					{/each}
 				</ul>
 			{/if}
@@ -109,3 +132,7 @@
 		Fuente de datos: {IS_MOCK_API ? 'API simulada' : API_HOST} · Fechas en {DISPLAY_TIME_ZONE}
 	</footer>
 </div>
+
+{#if selectedCustomer}
+	<CustomerDetailDrawer customer={selectedCustomer} onClose={closeDetail} />
+{/if}

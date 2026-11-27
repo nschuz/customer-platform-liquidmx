@@ -13,6 +13,18 @@
 	--color-status-active: var(--color-green-800);
 	--color-status-pending: var(--color-amber-800);
 	--color-status-blocked: var(--color-red-700);
+
+	/* Entrance of the drawer. Used as motion-safe:animate-slide-in, so reduced motion skips it. */
+	--animate-slide-in: slide-in 250ms ease-out;
+
+	@keyframes slide-in {
+		from {
+			transform: translateX(100%);
+		}
+		to {
+			transform: translateX(0);
+		}
+	}
 }
 
 /* One visible focus ring for every control, instead of repeating it on each element. */

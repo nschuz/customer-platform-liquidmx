@@ -1,5 +1,5 @@
-import { render, screen, within } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
 import type { Customer } from '#lib/types/customer.ts';
 import CustomerTable from './CustomerTable.svelte';
 
@@ -20,8 +20,8 @@ const customers: Customer[] = [
 	}
 ];
 
-function renderTable(): HTMLElement {
-	render(CustomerTable, { customers });
+function renderTable(onShowDetail = vi.fn()): HTMLElement {
+	render(CustomerTable, { customers, onShowDetail });
 	return screen.getByRole('table', { name: 'Clientes' }) as HTMLElement;
 }
 
@@ -29,9 +29,18 @@ describe('CustomerTable', () => {
 	it('is a named table with one column per field', () => {
 		const table = renderTable();
 
-		for (const header of ['Nombre', 'Email', 'Estado', 'Fecha de registro']) {
+		for (const header of ['Nombre', 'Email', 'Estado', 'Fecha de registro', 'Acciones']) {
 			expect(within(table).getByRole('columnheader', { name: header })).toBeTruthy();
 		}
+	});
+
+	it('opens the detail of the customer whose row was clicked', async () => {
+		const onShowDetail = vi.fn();
+		renderTable(onShowDetail);
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Carmen Ruiz' }));
+
+		expect(onShowDetail).toHaveBeenCalledExactlyOnceWith(customers[1]);
 	});
 
 	it('renders one row per customer with its data', () => {

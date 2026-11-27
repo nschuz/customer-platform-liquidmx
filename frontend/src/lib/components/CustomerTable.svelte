@@ -3,7 +3,10 @@
 	import { formatDateTime } from '#lib/utils/formatters.ts';
 	import StatusBadge from './StatusBadge.svelte';
 
-	let { customers }: { customers: Customer[] } = $props();
+	let { customers, onShowDetail }: {
+		customers: Customer[];
+		onShowDetail: (customer: Customer) => void;
+	} = $props();
 </script>
 
 <div class="overflow-hidden rounded-xl border border-line bg-surface">
@@ -11,10 +14,11 @@
 	<table class="w-full table-fixed text-left text-sm">
 		<caption class="sr-only">Clientes</caption>
 		<colgroup>
-			<col class="w-[22%]" />
-			<col class="w-[33%]" />
-			<col class="w-[18%]" />
-			<col class="w-[27%]" />
+			<col class="w-[19%]" />
+			<col class="w-[28%]" />
+			<col class="w-[16%]" />
+			<col class="w-[23%]" />
+			<col class="w-[14%]" />
 		</colgroup>
 		<thead class="border-b border-line text-xs text-muted uppercase tracking-wide">
 			<tr>
@@ -22,6 +26,7 @@
 				<th scope="col" class="px-2 py-3 font-medium lg:px-4">Email</th>
 				<th scope="col" class="px-2 py-3 font-medium lg:px-4">Estado</th>
 				<th scope="col" class="px-2 py-3 font-medium lg:px-4">Fecha de registro</th>
+				<th scope="col" class="px-2 py-3 text-right font-medium lg:px-4">Acciones</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -34,6 +39,16 @@
 					<td class="px-2 py-3 lg:px-4"><StatusBadge status={customer.status} /></td>
 					<td class="truncate px-2 py-3 text-muted lg:px-4">
 						<time datetime={customer.created_at}>{formatDateTime(customer.created_at)}</time>
+					</td>
+					<td class="px-2 py-3 text-right lg:px-4">
+						<button
+							type="button"
+							class="rounded-lg border border-line px-2.5 py-1 text-sm font-medium text-accent transition-colors hover:bg-page lg:px-3"
+							aria-label="Ver detalle de {customer.name}"
+							onclick={() => onShowDetail(customer)}
+						>
+							Ver detalle
+						</button>
 					</td>
 				</tr>
 			{/each}
